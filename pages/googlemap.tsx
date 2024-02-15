@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
 
 interface GoogleMapProps {
   apiKey: string;
@@ -6,8 +7,13 @@ interface GoogleMapProps {
   zoom?: number;
   className?: string;
   style?: React.CSSProperties;
+  streetViewControl?: boolean;
+  clickableIcons?: boolean;
+  disableDefaultUI?: boolean;
+  maxZoom?: number;
+  minZoom?: number;
+  markers?: { location: { _lat: number; _long: number }; }[];
 }
-
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
@@ -15,6 +21,11 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   zoom = 15,
   className,
   style,
+  streetViewControl = false,
+  clickableIcons = false,
+  maxZoom = 20,
+  minZoom = 15,
+  markers,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -28,9 +39,22 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
     function initMap() {
       if (!mapRef.current) return;
-      new google.maps.Map(mapRef.current, {
+      const map = new google.maps.Map(mapRef.current, {
         center,
         zoom,
+        streetViewControl,
+        clickableIcons,
+        maxZoom,
+        minZoom,
+      });
+
+      // Add markers to the map
+      if (!markers) return;
+      markers.forEach((marker) => {
+        new google.maps.Marker({
+          position: { lat: marker.location._lat, lng: marker.location._long },
+          map,
+        });
       });
     }
 
@@ -38,7 +62,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       // Clean up the script tag when the component unmounts
       document.head.removeChild(script);
     };
-  }, [apiKey, center, zoom]);
+  }, [apiKey, center, zoom, markers]);
 
   return (
     <div

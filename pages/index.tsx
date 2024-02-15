@@ -2,10 +2,49 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import GoogleMap from "./googlemap";
 import { useEffect, useState } from "react";
+import { getFirestore, collection, getDocs, QueryDocumentSnapshot } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+
+// Define the interface for a place
+interface Place {
+  location: {
+  _lat: number;
+  _long: number;
+  }
+}
 
 export default function Home() {
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number }>({lat: 34.0699, lng: -118.4438});
+  const [places, setPlaces] = useState<Place[]>([]);
+
+
+  useEffect(() => {
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvRoc9FQ062XeJFyfU0NLAYGMBj5FYcKA",
+      authDomain: "bruin-banter-3cc68.firebaseapp.com",
+      projectId: "bruin-banter-3cc68",
+      storageBucket: "bruin-banter-3cc68.appspot.com",
+      messagingSenderId: "258877012527",
+      appId: "1:258877012527:web:b6517aedaa443d2456a4da",
+      measurementId: "G-RQL68MHJF2"
+    };
+    const firebaseApp = initializeApp(firebaseConfig);
+
+    // Access Firestore
+    const db = getFirestore(firebaseApp);
+
+    // Fetch places data from Firestore
+    const fetchPlaces = async () => {
+      const placesCollection = collection(db, 'places');
+      const placesSnapshot = await getDocs(placesCollection);
+      const placesData = placesSnapshot.docs.map((doc: QueryDocumentSnapshot) => doc.data()) as Place[];
+      setPlaces(placesData);
+    };
+
+    fetchPlaces();
+  }, []);
 
 
   useEffect(() => {
@@ -38,6 +77,7 @@ export default function Home() {
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
             center={userLocation}
             style={{ marginBottom: '20px' }}
+            markers={places}
           />
           <h1 className="max-w-3xl font-heading font-semibold text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter">
             Start building your next billion dollar idea.
