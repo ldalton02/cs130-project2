@@ -54,6 +54,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
+          animation: google.maps.Animation.DROP,
         });
       });
     }
