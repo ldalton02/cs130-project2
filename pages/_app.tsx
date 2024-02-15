@@ -57,16 +57,16 @@ export default function App({ Component, pageProps }: AppProps) {
                 <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
                   <FishIcon />
                   <p className="text-center text-sm leading-loose md:text-left">
-                    An{" "}
+                    {" "}
                     <a
-                      href="https://enesien.com"
+                      href="https://github.com/ldalton02/cs130-project2"
                       target="_blank"
                       rel="noreferrer"
                       className="font-medium underline underline-offset-4"
                     >
-                      enesien software
+                      Scrum Studs
                     </a>{" "}
-                    project.
+                    .
                   </p>
                 </div>
               </div>

@@ -18,21 +18,9 @@ export const NavBar: FC = () => {
           <nav className="hidden gap-6 md:flex">
             <Link
               className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
-              href="/#how-it-works"
+              href="/howItWorks"
             >
               How it Works
-            </Link>
-            <Link
-              className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
-              href="/#features"
-            >
-              Features
-            </Link>
-            <Link
-              className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
-              href="/#pricing"
-            >
-              Pricing
             </Link>
           </nav>
           <button className="flex items-center space-x-2 md:hidden">
