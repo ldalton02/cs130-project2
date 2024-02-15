@@ -50,12 +50,40 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
       // Add markers to the map
       if (!markers) return;
+      var previousInfoWindow = false;
+
       markers.forEach((marker) => {
-        new google.maps.Marker({
+        const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
           animation: google.maps.Animation.DROP,
         });
+
+        // Click event listener
+        const infoWindow = new google.maps.InfoWindow();
+        const infoWindowContentString = `
+          <div>
+            <h2 style="padding-bottom: 5px; font-weight: bold;"></h2>
+            <a href="/login">
+              <button style="background-color: #007bff; color: #ffffff; border-radius: 10px; cursor: pointer; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px;">
+                Join
+              </button>
+            </a>
+          </div>
+        `;
+
+        iconMarker.addListener("click", () => {
+          //keeps only one info window open at a time
+          if(previousInfoWindow) {
+            previousInfoWindow.close();
+          }
+          previousInfoWindow = infoWindow;
+
+          //set info window content
+          infoWindow.setContent(infoWindowContentString);
+          infoWindow.open(iconMarker.getMap(), iconMarker);
+        });
+
       });
     }
 
