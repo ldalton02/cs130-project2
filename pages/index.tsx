@@ -32,7 +32,7 @@ export default function Home() {
 
   return (
     <div className="">
-      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
+      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10">
         <div className="container flex flex-col items-center gap-8 text-center">
           <GoogleMap
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
