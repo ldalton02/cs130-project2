@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { images } from '../assets/index';
 
 
 interface GoogleMapProps {
@@ -12,7 +13,7 @@ interface GoogleMapProps {
   disableDefaultUI?: boolean;
   maxZoom?: number;
   minZoom?: number;
-  markers?: { location: { _lat: number; _long: number }; }[];
+  markers?: { location: { _lat: number; _long: number }; type: string}[];
 }
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
@@ -53,10 +54,14 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       var previousInfoWindow = false;
 
       markers.forEach((marker) => {
+        console.log(marker)
         const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
           animation: google.maps.Animation.DROP,
+          // TODO: Change the icon color based on activity levels
+          // Roccos not showing up for some reason (very fitting)
+          icon: images[`${marker.type}_green`],
         });
 
         // Click event listener
