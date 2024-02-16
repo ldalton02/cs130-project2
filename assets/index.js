@@ -1,5 +1,3 @@
-import logo from 'assets/images/logo.svg'
-import profile from 'assets/images/profile.png'
 import markerDefault from 'assets/images/marker-default.svg'
 import markerBarGreen from 'assets/images/marker-bar-green.svg'
 import markerBarOrange from 'assets/images/marker-bar-orange.svg'
@@ -15,21 +13,20 @@ import markerGymOrange from 'assets/images/marker-gym-orange.svg'
 import markerGymRed from 'assets/images/marker-gym-red.svg'
 
 export const images = {
-  logo,
-  profile,
-  markerBarOrange,
-  markerRestaurantOrange,
-  markerLibraryOrange,
-  markerGymOrange,
-  markerDefault,
-  markerBarGreen,
-  markerRestaurantGreen,
-  markerLibraryGreen,
-  markerGymGreen,
-  markerBarRed,
-  markerRestaurantRed,
-  markerLibraryRed,
-  markerGymRed,
+  food_red: "https://svgshare.com/i/13AU.svg",
+  food_orange: "https://svgshare.com/i/138w.svg",
+  food_green: "https://svgshare.com/i/13A5.svg",
+  library_red: "https://svgshare.com/i/139i.svg",
+  library_orange: "https://svgshare.com/i/13A6.svg",
+  library_green: "https://svgshare.com/i/138x.svg",
+  gym_red: "https://svgshare.com/i/13A7.svg",
+  gym_orange: "https://svgshare.com/i/13Ac.svg",
+  gym_green: "https://svgshare.com/i/13A8.svg",
+  bar_red: "https://svgshare.com/i/139N.svg",
+  bar_orange: "https://svgshare.com/i/13Ae.svg",
+  bar_green: "https://svgshare.com/i/13AG.svg",
+  default: "https://svgshare.com/i/13Ao.svg",
+
 }
 
 export default {}
