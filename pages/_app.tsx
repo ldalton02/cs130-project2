@@ -49,7 +49,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <FirebaseAppProvider firebaseConfig={firebaseConfig}>
           <FirebaseProviders>
             <NavBar />
-            <div className="container grow">
+            <div className="container grow px-0 ">
               <Component {...pageProps} />
             </div>
             <footer>
