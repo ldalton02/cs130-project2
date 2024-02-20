@@ -69,7 +69,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           animation: google.maps.Animation.DROP,
           // TODO: Change the icon color based on activity levels
           // Roccos not showing up for some reason (very fitting)
-          icon: images[`${marker.type}_green`],
+          icon: images[`${marker.type}_green`]
         });
         
         iconMarker.addListener("click", () => {

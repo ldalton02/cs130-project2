@@ -4,6 +4,8 @@ import {
   collection,
   orderBy,
   query,
+  where,
+  getDocs
 } from "firebase/firestore";
 import {
   useFirestore,
@@ -29,6 +31,7 @@ export default function Home() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
+  const [numberOfChats, setNumberOfChats] = useState<number>(0); // State to store the number of chats
   const { toast, dismiss } = useToast();
   const dismissToast = () => {
     dismiss(); // Dismiss all toasts
@@ -75,6 +78,29 @@ export default function Home() {
       console.error("Geolocation is not supported by this browser.");
     }
   }, []);
+
+  // chelsea
+
+  const fetchNumberOfChats = async (room: string) => {
+    const chatsCollection = collection(firestore, "chats");
+    const now = new Date();
+    const oneHourAgo = now.getTime() - 60 * 60 * 1000;
+  
+    const chatsQuery = query(chatsCollection, where("time", ">=", oneHourAgo), where("place", "==", room));
+    const querySnapshot = await getDocs(chatsQuery);
+    // Get the size of the snapshot to determine the number of chats
+    const numberOfChats = querySnapshot.size;
+    // Update the state with the number of chats
+    setNumberOfChats(numberOfChats);
+  };
+  
+  // Fetch the number of chats when the component mounts
+  useEffect(() => {
+    const room = "your_room_name_here"; // Specify the room name here
+    fetchNumberOfChats(room);
+  }, []);
+  
+  // chelsea
 
   // TODO(ldalton02): create better loading status...
   if (placeQueryStatus == 'loading' || signInStatus == 'loading') {
