@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { images } from '../assets/index';
-
-
+import { Button } from '@/components/ui/button';
 interface GoogleMapProps {
   apiKey: string;
   center: { lat: number; lng: number };
@@ -13,8 +12,14 @@ interface GoogleMapProps {
   disableDefaultUI?: boolean;
   maxZoom?: number;
   minZoom?: number;
-  markers?: { location: { _lat: number; _long: number }; type: string}[];
+  markers?: { location: { _lat: number; _long: number }; type: string; name: string}[];
+  notSignedIn: () => void;
+  signInCheckResult: boolean,
+  setIsOpen: (isOpen: boolean) => void;
+  setPlace: (place: any) => void;
 }
+
+import { InfoWindow } from "@react-google-maps/api";
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
@@ -27,6 +32,10 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   maxZoom = 20,
   minZoom = 15,
   markers,
+  notSignedIn,
+  signInCheckResult,
+  setIsOpen,
+  setPlace,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +63,6 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       var previousInfoWindow = false;
 
       markers.forEach((marker) => {
-        console.log(marker)
         const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
@@ -63,32 +71,15 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           // Roccos not showing up for some reason (very fitting)
           icon: images[`${marker.type}_green`],
         });
-
-        // Click event listener
-        const infoWindow = new google.maps.InfoWindow();
-        const infoWindowContentString = `
-          <div>
-            <h2 style="padding-bottom: 5px; font-weight: bold;"></h2>
-            <a href="/login">
-              <button style="background-color: #007bff; color: #ffffff; border-radius: 10px; cursor: pointer; padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px;">
-                Join
-              </button>
-            </a>
-          </div>
-        `;
-
+        
         iconMarker.addListener("click", () => {
-          //keeps only one info window open at a time
-          if(previousInfoWindow) {
-            previousInfoWindow.close();
-          }
-          previousInfoWindow = infoWindow;
-
-          //set info window content
-          infoWindow.setContent(infoWindowContentString);
-          infoWindow.open(iconMarker.getMap(), iconMarker);
+          if (signInCheckResult) {
+            setPlace(marker);
+            setIsOpen(true);    
+          } else {
+            notSignedIn();
+          }          
         });
-
       });
     }
 
@@ -102,7 +93,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
     <div
       ref={mapRef}
       className={className}
-      style={{ width: '100%', height: '400px', ...style }}
+      style={{ width: '100%', height: '70vh', ...style }}
     />
   );
 };

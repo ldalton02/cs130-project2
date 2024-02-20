@@ -1,56 +1,65 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import GoogleMap from "./googlemap";
 import { useEffect, useState } from "react";
-import { getFirestore, collection, getDocs, QueryDocumentSnapshot } from "firebase/firestore";
-import { initializeApp } from "firebase/app";
+import {
+  collection,
+  orderBy,
+  query,
+} from "firebase/firestore";
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useSigninCheck
+} from "reactfire";
 
+import { ChatroomModal } from "@/components/ChatroomModal";
 // Define the interface for a place
 interface Place {
   location: {
-  _lat: number;
-  _long: number;
-  }
+    _lat: number;
+    _long: number;
+  };
 }
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Home() {
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  }>({ lat: 34.0699, lng: -118.4438 });
 
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number }>({lat: 34.0699, lng: -118.4438});
-  const [places, setPlaces] = useState<Place[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [place, setPlace] = useState(null);
+  const { toast, dismiss } = useToast();
+  const dismissToast = () => {
+    dismiss(); // Dismiss all toasts
+  };
+  const showToast = () => {
+    toast({
+      title: "",
+      description: "Sign in to view messages.",
+    });
 
+    setTimeout(() => {
+      dismissToast();
+    }, 3000)
+  };
+  
+  // START: reactfire Hooks to subscribe to places database:
+  const firestore = useFirestore();
+  const placesCollection = collection(firestore, "places");
+  const placesQuery = query(placesCollection, orderBy("name", "asc"));
+  // Fetch places data from Firestore
+  const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(placesQuery, {
+    idField: "id",
+  });
+  const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
 
+  // END
+
+  // Manually get user location
   useEffect(() => {
-    // Initialize Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCvRoc9FQ062XeJFyfU0NLAYGMBj5FYcKA",
-      authDomain: "bruin-banter-3cc68.firebaseapp.com",
-      projectId: "bruin-banter-3cc68",
-      storageBucket: "bruin-banter-3cc68.appspot.com",
-      messagingSenderId: "258877012527",
-      appId: "1:258877012527:web:b6517aedaa443d2456a4da",
-      measurementId: "G-RQL68MHJF2"
-    };
-    const firebaseApp = initializeApp(firebaseConfig);
-
-    // Access Firestore
-    const db = getFirestore(firebaseApp);
-
-    // Fetch places data from Firestore
-    const fetchPlaces = async () => {
-      const placesCollection = collection(db, 'places');
-      const placesSnapshot = await getDocs(placesCollection);
-      const placesData = placesSnapshot.docs.map((doc: QueryDocumentSnapshot) => doc.data()) as Place[];
-      setPlaces(placesData);
-    };
-
-    fetchPlaces();
-  }, []);
-
-
-  useEffect(() => {
-
     // Check if geolocation is supported by the browser
-    if ('geolocation' in navigator) {
+    if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation({
@@ -59,45 +68,39 @@ export default function Home() {
           });
         },
         (error) => {
-          console.error('Error getting user location:', error);
+          console.error("Error getting user location:", error);
         }
       );
     } else {
-      console.error('Geolocation is not supported by this browser.');
+      console.error("Geolocation is not supported by this browser.");
     }
-
-
   }, []);
 
+  // TODO(ldalton02): create better loading status...
+  if (placeQueryStatus == 'loading' || signInStatus == 'loading') {
+    return <p>loading</p>
+  }
+  
   return (
-    <div className="">
-      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10">
-        <div className="container flex flex-col items-center gap-8 text-center">
+    <div className="h-full">
+      <section className="h-full flex flex-col justify-center items-center pb-8 pt-6 md:pb-12 md:pt-10">
+        <div className="h-full container flex flex-col items-center gap-8 text-center sm:px-0">
           <GoogleMap
+            setPlace={setPlace}
+            setIsOpen={setIsOpen}
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
             center={userLocation}
-            style={{ marginBottom: '20px' }}
-            markers={places}
+            style={{ marginBottom: "20px" }}
+            markers={
+            // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
+             places
+            }
+            notSignedIn={showToast}
+            signInCheckResult={signInCheckResult.signedIn === true}
           />
-          <h1 className="max-w-3xl font-heading font-semibold text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter">
-            Start building your next billion dollar idea.
-          </h1>
-          <p className="max-w-xl leading-normal text-muted-foreground sm:text-xl sm:leading-8">
-            Boilerplate for React projects using Next.js, shadcn/ui, Tailwind
-            and Firebase...and TypeScript, of course!
-          </p>
-          <div className="space-x-4">
-            <Link href="/login">
-              <Button size="lg">Sign in to get started</Button>
-            </Link>
-            <Link target="_blank" href="https://github.com/enesien/venefish">
-              <Button size="lg" variant="link">
-                View on GitHub &rarr;
-              </Button>
-            </Link>
-          </div>
         </div>
       </section>
+      <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} />
     </div>
   );
 }
