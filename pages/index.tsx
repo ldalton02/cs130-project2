@@ -27,6 +27,7 @@ export default function Home() {
     lng: number;
   }>({ lat: 34.0699, lng: -118.4438 });
 
+  const [closestMarker, setClosestMarker] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
   const { toast, dismiss } = useToast();
@@ -76,6 +77,7 @@ export default function Home() {
     }
   }, []);
 
+
   // TODO(ldalton02): create better loading status...
   if (placeQueryStatus == 'loading' || signInStatus == 'loading') {
     return <p>loading</p>
@@ -92,15 +94,16 @@ export default function Home() {
             center={userLocation}
             style={{ marginBottom: "20px" }}
             markers={
-            // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
-             places
+              // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
+              places
             }
             notSignedIn={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
+            onMarkerChange={setClosestMarker}
           />
         </div>
       </section>
-      <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} />
+      <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} closestMarkerIndex={closestMarker} />
     </div>
   );
 }

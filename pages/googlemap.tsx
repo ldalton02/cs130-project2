@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { images } from '../assets/index';
 import { Button } from '@/components/ui/button';
+import { InfoWindow } from "@react-google-maps/api";
+
 interface GoogleMapProps {
   apiKey: string;
   center: { lat: number; lng: number };
@@ -17,9 +19,8 @@ interface GoogleMapProps {
   signInCheckResult: boolean,
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
+  onMarkerChange: (index: string | null) => void;
 }
-
-import { InfoWindow } from "@react-google-maps/api";
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
@@ -36,19 +37,21 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   signInCheckResult,
   setIsOpen,
   setPlace,
+  onMarkerChange,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
     script.async = true;
     script.defer = true;
     script.onload = initMap;
     document.head.appendChild(script);
 
     function initMap() {
-      if (!mapRef.current) return;
+      if (!mapRef.current || !markers || markers.length === 0) return;
+
       const map = new google.maps.Map(mapRef.current, {
         center,
         zoom,
@@ -58,17 +61,36 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         minZoom,
       });
 
-      // Add markers to the map
-      if (!markers) return;
-      var previousInfoWindow = false;
+      // Calculate distances from user location to each marker
+      const distances = markers.map((marker) => {
+        const markerLocation = new google.maps.LatLng(marker.location._lat, marker.location._long);
+        return google.maps.geometry.spherical.computeDistanceBetween(center, markerLocation);
+      });
 
-      markers.forEach((marker) => {
+      // Find the index of the closest marker within 50 meters
+      let closestMarkerIndex = -1;
+      let minDistance = Infinity;
+      distances.forEach((distance, index) => {
+        if (distance < 50 && distance < minDistance) {
+          minDistance = distance;
+          closestMarkerIndex = index;
+        }
+      });
+
+      // Invoke the callback function with the closestMarkerIndex
+      if (closestMarkerIndex !== -1) {
+        onMarkerChange(markers[closestMarkerIndex].name);
+      }
+      else {
+        onMarkerChange(null);
+      }
+
+      // Add markers to the map
+      markers.forEach((marker, index) => {
         const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
           animation: google.maps.Animation.DROP,
-          // TODO: Change the icon color based on activity levels
-          // Roccos not showing up for some reason (very fitting)
           icon: images[`${marker.type}_green`],
         });
         
@@ -80,6 +102,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
             notSignedIn();
           }          
         });
+
       });
     }
 
