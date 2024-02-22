@@ -41,9 +41,9 @@ const getHumanReadableTime = (database_date: any) => {
   ) {
     // If the message date is today, display "Today"
     let hour_minute = new Date(database_date).toLocaleString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     return String(hour_minute) + ' Today';
   } else {
     // If the message date is older, display the full date
@@ -111,7 +111,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                       <div className="flex items-center justify-between">
                         <div>Anonymous</div> {/* Username */}
                         <div>
-                          {getHumanReadableTime(msg.time )}
+                          {getHumanReadableTime(msg.time)}
                         </div>{" "}
                         {/* Time */}
                       </div>
@@ -153,7 +153,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                 place: place.id,
                 message,
                 time: new Date().getTime(),
-                uid: currentUser.data.uid,
+                uid: currentUser.data!.uid,
               });
               setMessage("")
             }}

@@ -19,6 +19,8 @@ interface Place {
     _long: number;
   };
 }
+import { MyScrollableChart } from '../components/activity-chart/activity-chart'
+
 import { useToast } from "@/components/ui/use-toast";
 
 export default function Home() {
@@ -43,7 +45,7 @@ export default function Home() {
       dismissToast();
     }, 3000)
   };
-  
+
   // START: reactfire Hooks to subscribe to places database:
   const firestore = useFirestore();
   const placesCollection = collection(firestore, "places");
@@ -80,7 +82,7 @@ export default function Home() {
   if (placeQueryStatus == 'loading' || signInStatus == 'loading') {
     return <p>loading</p>
   }
-  
+
   return (
     <div className="h-full">
       <section className="h-full flex flex-col justify-center items-center pb-8 pt-6 md:pb-12 md:pt-10">
@@ -92,8 +94,8 @@ export default function Home() {
             center={userLocation}
             style={{ marginBottom: "20px" }}
             markers={
-            // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
-             places
+              // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
+              places
             }
             notSignedIn={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
@@ -101,6 +103,9 @@ export default function Home() {
         </div>
       </section>
       <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} />
+      <div className="h-h-full flex flex-col justify-center items-center pb-8 pt-6 md:pb-12 md:pt-10">
+        <MyScrollableChart />
+      </div>
     </div>
   );
 }
