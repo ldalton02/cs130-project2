@@ -1,6 +1,6 @@
 import { UserNav } from "@/components/UserNav";
 import { Button } from "@/components/ui/button";
-import { FishIcon } from "lucide-react";
+import { Speech } from "lucide-react";
 import Link from "next/link";
 import { FC } from "react";
 import { useUser } from "reactfire";
@@ -12,7 +12,7 @@ export const NavBar: FC = () => {
       <div className="flex h-20 items-center justify-between py-6">
         <div className="flex gap-6 md:gap-10">
           <Link className="hidden items-center space-x-2 md:flex" href="/">
-            <FishIcon />
+            <Speech />
             <span className="hidden font-bold sm:inline-block">Bruin Banter</span>
           </Link>
           <nav className="hidden gap-6 md:flex">

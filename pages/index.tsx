@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import {
   collection,
   orderBy,
-  query
+  query,
+  Timestamp
 } from "firebase/firestore";
 import {
   useFirestore,
@@ -27,6 +28,7 @@ export default function Home() {
     lng: number;
   }>({ lat: 34.0699, lng: -118.4438 });
 
+  const [closestMarker, setClosestMarker] = useState<string[] | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
   const { toast, dismiss } = useToast();
@@ -66,8 +68,8 @@ export default function Home() {
   const activities: { [key: string]: number } = {};
 
   // Calculate the timestamp for an hour ago
-  const now = new Date();
-  const oneHourAgo = now.getTime() - (60 * 60 * 1000);
+  const now = Timestamp.now().seconds
+  const oneHourAgo = now - 3600;
   
   if(places) {
     const placeIdToName: { [key: string]: string } = {};
@@ -105,6 +107,7 @@ export default function Home() {
     }
   }, []);
 
+
   // TODO(ldalton02): create better loading status...
   if (placeQueryStatus == 'loading' || signInStatus == 'loading') {
     return <p>loading</p>
@@ -121,8 +124,8 @@ export default function Home() {
             center={userLocation}
             style={{ marginBottom: "20px" }}
             markers={
-            // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
-             places
+              // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
+              places
             }
             // TODO make another thing here to pass in chats
             activities={
@@ -130,10 +133,11 @@ export default function Home() {
             }
             notSignedIn={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
+            onMarkerChange={setClosestMarker}
           />
         </div>
       </section>
-      <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} />
+      <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} closestMarkerIndex={closestMarker} />
     </div>
   );
 }

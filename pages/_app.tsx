@@ -13,7 +13,7 @@ import {
 import { Work_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { getAuth } from "firebase/auth";
-import { FishIcon } from "lucide-react";
+import { Speech } from "lucide-react";
 
 const inter = Work_Sans({ subsets: ["latin"] });
 
@@ -55,7 +55,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <footer>
               <div className="container flex flex-col items-center justify-between gap-4 py-10 md:h-24 md:flex-row md:py-0">
                 <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-                  <FishIcon />
+                  <Speech />
                   <p className="text-center text-sm leading-loose md:text-left">
                     {" "}
                     <a
