@@ -93,7 +93,6 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
     setPlace(null)
     setIsOpen(open)
   }
-  console.log(closestMarkerIndex)
 
   return (
     <Dialog open={isOpen} onOpenChange={openChange}>

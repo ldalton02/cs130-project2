@@ -66,7 +66,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         position: center,
         map,
         animation: google.maps.Animation.DROP,
-        icon: images["default"], // Provide the appropriate image for the user's location marker
+        icon: images["user_location"], // Provide the appropriate image for the user's location marker
       });
     
       // Calculate distances from user location to each marker
