@@ -27,7 +27,7 @@ export default function Home() {
     lng: number;
   }>({ lat: 34.0699, lng: -118.4438 });
 
-  const [closestMarker, setClosestMarker] = useState<string | null>(null);
+  const [closestMarker, setClosestMarker] = useState<string[] | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
   const { toast, dismiss } = useToast();

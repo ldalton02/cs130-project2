@@ -29,7 +29,7 @@ interface ChatroomModalProps {
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
   place: any;
-  closestMarkerIndex: number;
+  closestMarkerIndex: string[] | null;
 }
 
 const getHumanReadableTime = (database_date: any) => {
@@ -93,6 +93,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
     setPlace(null)
     setIsOpen(open)
   }
+  console.log(closestMarkerIndex)
 
   return (
     <Dialog open={isOpen} onOpenChange={openChange}>
@@ -139,7 +140,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           )}
         </div>
         {/* (stovsky) set to true for testing purposes to test all chats*/}
-        {(false || (closestMarkerIndex === place.name)) ? (
+        {(false || (closestMarkerIndex?.includes(place.name))) ? (
 
                 <div className="flex flex-row items-end gap-2 text-center h-min">
                 {/*TODO(ldalton02): add list here */}

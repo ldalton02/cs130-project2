@@ -19,7 +19,7 @@ interface GoogleMapProps {
   signInCheckResult: boolean,
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
-  onMarkerChange: (index: string | null) => void;
+  onMarkerChange: (index: string[] | null) => void;
 }
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
@@ -51,7 +51,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
     function initMap() {
       if (!mapRef.current || !markers || markers.length === 0) return;
-
+    
       const map = new google.maps.Map(mapRef.current, {
         center,
         zoom,
@@ -60,31 +60,36 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         maxZoom,
         minZoom,
       });
-
+    
+      // Add marker for the user's location
+      const userMarker = new google.maps.Marker({
+        position: center,
+        map,
+        animation: google.maps.Animation.DROP,
+        icon: images["default"], // Provide the appropriate image for the user's location marker
+      });
+    
       // Calculate distances from user location to each marker
       const distances = markers.map((marker) => {
         const markerLocation = new google.maps.LatLng(marker.location._lat, marker.location._long);
-        return google.maps.geometry.spherical.computeDistanceBetween(center, markerLocation);
+        return {
+          index: marker.name, // Store the index of the marker
+          distance: google.maps.geometry.spherical.computeDistanceBetween(center, markerLocation)
+        };
       });
-
-      // Find the index of the closest marker within 50 meters
-      let closestMarkerIndex = -1;
-      let minDistance = Infinity;
-      distances.forEach((distance, index) => {
-        if (distance < 50 && distance < minDistance) {
-          minDistance = distance;
-          closestMarkerIndex = index;
+    
+      // Find markers within {threshold} meters and store their indices
+      const closestMarkersIndices : string[] = [];
+      const thresholdDistance = 200; // Adjust the threshold distance as needed
+      distances.forEach((item) => {
+        if (item.distance < thresholdDistance) {
+          closestMarkersIndices.push(item.index);
         }
       });
-
-      // Invoke the callback function with the closestMarkerIndex
-      if (closestMarkerIndex !== -1) {
-        onMarkerChange(markers[closestMarkerIndex].name);
-      }
-      else {
-        onMarkerChange(null);
-      }
-
+    
+      // Invoke the callback function with the closestMarkersIndices
+      onMarkerChange(closestMarkersIndices.length > 0 ? closestMarkersIndices : null);
+    
       // Add markers to the map
       markers.forEach((marker, index) => {
         const iconMarker = new google.maps.Marker({
@@ -93,18 +98,19 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           animation: google.maps.Animation.DROP,
           icon: images[`${marker.type}_green`],
         });
-        
+    
         iconMarker.addListener("click", () => {
           if (signInCheckResult) {
             setPlace(marker);
-            setIsOpen(true);    
+            setIsOpen(true);
           } else {
             notSignedIn();
-          }          
+          }
         });
-
       });
     }
+    
+    
 
     return () => {
       // Clean up the script tag when the component unmounts
