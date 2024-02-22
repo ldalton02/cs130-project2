@@ -3,9 +3,7 @@ import { useEffect, useState } from "react";
 import {
   collection,
   orderBy,
-  query,
-  where,
-  getDocs
+  query
 } from "firebase/firestore";
 import {
   useFirestore,
@@ -31,7 +29,6 @@ export default function Home() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
-  const [numberOfChats, setNumberOfChats] = useState<number>(0); // State to store the number of chats
   const { toast, dismiss } = useToast();
   const dismissToast = () => {
     dismiss(); // Dismiss all toasts
@@ -57,7 +54,36 @@ export default function Home() {
   });
   const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
 
+  // Fetch chats data from Firestore
+  const chatsCollection = collection(firestore, "chats");
+  const chatsQuery = query(chatsCollection);
+  const { status: chatQueryStatus, data: chats } = useFirestoreCollectionData(chatsQuery, {
+    idField: "id",
+  });
+  console.log(placeQueryStatus);
   // END
+
+  const activities: { [key: string]: number } = {};
+
+  // Calculate the timestamp for an hour ago
+  const now = new Date();
+  const oneHourAgo = now.getTime() - (60 * 60 * 1000);
+  
+  if(places) {
+    const placeIdToName: { [key: string]: string } = {};
+    places.forEach((place) => {
+      placeIdToName[place.id] = place.name;
+    });
+    
+    // Iterate over chats and update the activities dictionary
+    chats.forEach((chat) => {
+      const { place, time } = chat;
+      if (time >= oneHourAgo) {
+        const placeName = placeIdToName[place];
+        activities[placeName] = (activities[placeName] || 0) + 1;
+      }
+    });
+  }
 
   // Manually get user location
   useEffect(() => {
@@ -79,29 +105,6 @@ export default function Home() {
     }
   }, []);
 
-  // chelsea
-
-  const fetchNumberOfChats = async (room: string) => {
-    const chatsCollection = collection(firestore, "chats");
-    const now = new Date();
-    const oneHourAgo = now.getTime() - 60 * 60 * 1000;
-  
-    const chatsQuery = query(chatsCollection, where("time", ">=", oneHourAgo), where("place", "==", room));
-    const querySnapshot = await getDocs(chatsQuery);
-    // Get the size of the snapshot to determine the number of chats
-    const numberOfChats = querySnapshot.size;
-    // Update the state with the number of chats
-    setNumberOfChats(numberOfChats);
-  };
-  
-  // Fetch the number of chats when the component mounts
-  useEffect(() => {
-    const room = "your_room_name_here"; // Specify the room name here
-    fetchNumberOfChats(room);
-  }, []);
-  
-  // chelsea
-
   // TODO(ldalton02): create better loading status...
   if (placeQueryStatus == 'loading' || signInStatus == 'loading') {
     return <p>loading</p>
@@ -120,6 +123,10 @@ export default function Home() {
             markers={
             // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
              places
+            }
+            // TODO make another thing here to pass in chats
+            activities={
+              activities
             }
             notSignedIn={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}

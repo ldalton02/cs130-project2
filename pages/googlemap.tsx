@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { images } from '../assets/index';
+//import fetchNumberOfChats  from './index';
 import { Button } from '@/components/ui/button';
 interface GoogleMapProps {
   apiKey: string;
@@ -13,6 +14,7 @@ interface GoogleMapProps {
   maxZoom?: number;
   minZoom?: number;
   markers?: { location: { _lat: number; _long: number }; type: string; name: string}[];
+  activities?: { [key: string]: number };
   notSignedIn: () => void;
   signInCheckResult: boolean,
   setIsOpen: (isOpen: boolean) => void;
@@ -32,6 +34,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   maxZoom = 20,
   minZoom = 15,
   markers,
+  activities,
   notSignedIn,
   signInCheckResult,
   setIsOpen,
@@ -58,18 +61,31 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         minZoom,
       });
 
+      // Go through and make activity levels ig
+      if(!activities) return;
+
       // Add markers to the map
       if (!markers) return;
       var previousInfoWindow = false;
 
       markers.forEach((marker) => {
+        const activityLevel = activities[marker.name] || 0;
+        let color;
+        // Define color based on activity level
+        if (activityLevel < 5) {
+         color = "green";
+        } else if (activityLevel < 10) {
+          color = "orange";
+        } else {
+          color = "red";
+        }
         const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
           animation: google.maps.Animation.DROP,
           // TODO: Change the icon color based on activity levels
           // Roccos not showing up for some reason (very fitting)
-          icon: images[`${marker.type}_green`]
+          icon: images[`${marker.type}_${color}`]
         });
         
         iconMarker.addListener("click", () => {
