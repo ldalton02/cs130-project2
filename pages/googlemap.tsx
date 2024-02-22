@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { images } from '../assets/index';
 import { Button } from '@/components/ui/button';
+import { InfoWindow } from "@react-google-maps/api";
+
 interface GoogleMapProps {
   apiKey: string;
   center: { lat: number; lng: number };
@@ -17,9 +19,8 @@ interface GoogleMapProps {
   signInCheckResult: boolean,
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
+  onMarkerChange: (index: string[] | null) => void;
 }
-
-import { InfoWindow } from "@react-google-maps/api";
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
@@ -36,19 +37,21 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   signInCheckResult,
   setIsOpen,
   setPlace,
+  onMarkerChange,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
     script.async = true;
     script.defer = true;
     script.onload = initMap;
     document.head.appendChild(script);
 
     function initMap() {
-      if (!mapRef.current) return;
+      if (!mapRef.current || !markers || markers.length === 0) return;
+    
       const map = new google.maps.Map(mapRef.current, {
         center,
         zoom,
@@ -57,31 +60,57 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         maxZoom,
         minZoom,
       });
-
+    
+      // Add marker for the user's location
+      const userMarker = new google.maps.Marker({
+        position: center,
+        map,
+        animation: google.maps.Animation.DROP,
+        icon: images["user_location"], // Provide the appropriate image for the user's location marker
+      });
+    
+      // Calculate distances from user location to each marker
+      const distances = markers.map((marker) => {
+        const markerLocation = new google.maps.LatLng(marker.location._lat, marker.location._long);
+        return {
+          index: marker.name, // Store the index of the marker
+          distance: google.maps.geometry.spherical.computeDistanceBetween(center, markerLocation)
+        };
+      });
+    
+      // Find markers within {threshold} meters and store their indices
+      const closestMarkersIndices : string[] = [];
+      const thresholdDistance = 200; // Adjust the threshold distance as needed
+      distances.forEach((item) => {
+        if (item.distance < thresholdDistance) {
+          closestMarkersIndices.push(item.index);
+        }
+      });
+    
+      // Invoke the callback function with the closestMarkersIndices
+      onMarkerChange(closestMarkersIndices.length > 0 ? closestMarkersIndices : null);
+    
       // Add markers to the map
-      if (!markers) return;
-      var previousInfoWindow = false;
-
-      markers.forEach((marker) => {
+      markers.forEach((marker, index) => {
         const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
           animation: google.maps.Animation.DROP,
-          // TODO: Change the icon color based on activity levels
-          // Roccos not showing up for some reason (very fitting)
           icon: images[`${marker.type}_green`],
         });
-        
+    
         iconMarker.addListener("click", () => {
           if (signInCheckResult) {
             setPlace(marker);
-            setIsOpen(true);    
+            setIsOpen(true);
           } else {
             notSignedIn();
-          }          
+          }
         });
       });
     }
+    
+    
 
     return () => {
       // Clean up the script tag when the component unmounts

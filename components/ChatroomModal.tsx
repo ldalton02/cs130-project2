@@ -29,6 +29,7 @@ interface ChatroomModalProps {
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
   place: any;
+  closestMarkerIndex: string[] | null;
 }
 
 const getHumanReadableTime = (database_date: any) => {
@@ -64,6 +65,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
   setIsOpen,
   place,
   setPlace,
+  closestMarkerIndex,
 }) => {
   if (!place) {
     return null;
@@ -106,7 +108,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                   {messages.map((msg) => (
                     <div
                       className="text-mauve12 text-[13px] leading-[18px] mt-2.5 pt-2.5 border-t border-t-mauve6"
-                      key={msg.uid}
+                      key={`${msg.uid}-${msg.time}`}
                     >
                       <div className="flex items-center justify-between">
                         <div>Anonymous</div> {/* Username */}
@@ -136,32 +138,47 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
             </ScrollArea.Root>
           )}
         </div>
-        <div className="flex flex-row items-end gap-2 text-center h-min">
-          {/*TODO(ldalton02): add list here */}
-          <Input
-            value={message}
-            onChange={(e) => setMessage(e.currentTarget.value)}
-            disabled={isLoading}
-            type="text"
-            required
-            className="border border-solid border border-black focus:outline-none focus-visible:ring-0"
-          />
-          <Button
-            disabled={isLoading}
-            onClick={() => {
-              addDoc(collection(firestore, "chats"), {
-                place: place.id,
-                message,
-                time: new Date().getTime(),
-                uid: currentUser.data.uid,
-              });
-              setMessage("")
-            }}
-          >
-            {" "}
-            Send
-          </Button>
-        </div>
+        {/* (stovsky) set to true for testing purposes to test all chats*/}
+        {(false || (closestMarkerIndex?.includes(place.name))) ? (
+
+                <div className="flex flex-row items-end gap-2 text-center h-min">
+                {/*TODO(ldalton02): add list here */}
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.currentTarget.value)}
+                  disabled={isLoading}
+                  type="text"
+                  required
+                  className="border border-solid border border-black focus:outline-none focus-visible:ring-0"
+                />
+                <Button
+                  disabled={isLoading}
+                  onClick={() => {
+                    addDoc(collection(firestore, "chats"), {
+                      place: place.id,
+                      message,
+                      time: new Date().getTime(),
+                      uid: currentUser.data.uid,
+                    });
+                    setMessage("")
+                  }}
+                >
+                  {" "}
+                  Send
+                </Button>
+                </div>
+
+                  ) : 
+
+                  <div className="flex justify-center mt-4">
+                  <p className="max-w-5xl leading-normal text-muted-foreground sm:text-xl sm:leading-8">
+                    Get closer to join the fun!
+                  </p>
+                          </div> 
+
+
+
+        }
       </DialogContent>
     </Dialog>
   );
