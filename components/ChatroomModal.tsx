@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, MouseEventHandler, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +19,13 @@ import {
   documentId,
   where,
   addDoc,
+  updateDoc,
   Timestamp,
 } from "firebase/firestore";
 import { useFirestoreCollectionData, useFirestore, useUser } from "reactfire";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons";
 
 interface ChatroomModalProps {
   isOpen: boolean;
@@ -124,7 +127,23 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           <div>Anonymous</div> {/* Username */}
           <div>{getHumanReadableTime(msg.time)}</div> {/* Time */}
         </div>
-        <div>{msg.message}</div> {/* Message Content */}
+        <div className="flex items-center justify-between">
+          <div>{msg.message}</div> {/* Message Content */}
+          <div>
+            <button onClick={() => {
+              const msgRef = doc(firestore, "chats", msg.id);
+              updateDoc(msgRef, {
+                upVote: (msg.upVote)? msg.upVote + 1 : 1
+              });
+            }} className="px-3"><FontAwesomeIcon icon={faCaretUp}/>{msg.upVote}</button>
+            <button onClick={() => {
+              const msgRef = doc(firestore, "chats", msg.id);
+              updateDoc(msgRef, {
+                downVote: (msg.downVote)? msg.downVote - 1 : -1
+              });
+            }}><FontAwesomeIcon icon={faCaretDown}/>{msg.downVote}</button>
+          </div> {/* Up and Down Vote */}
+        </div>
       </div>
     ));
   };
@@ -171,7 +190,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                     place: place.id,
                     message,
                     time: Timestamp.now().seconds,
-                    uid: currentUser.data.uid,
+                    uid: currentUser.data.uid
                   });
                 }
                 setMessage("");
