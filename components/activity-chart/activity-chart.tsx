@@ -20,33 +20,36 @@ interface LineItem {
     busynesslist?: BusynessMap[]
 }
 
+// data to pass to
+type DataBlock = any[]
 
 
 export const MyScrollableChart: FC = () => {
     // Firestore 
-    const [data, setData] = useState<LineItem[]>([]);
+    const [data, setData] = useState<DataBlock>();
     const firestore = useFirestore();
 
     // populate graph
     const TBM: DateMap = new Map;
     const keysArray = Array.from(TBM.keys());
 
+
     // TODO reorganize location of this loop
-    for (const key of keysArray) {
-        // if message falls within time period, add to our object
-        if (messageTime > key && messageTime < TBM.get(key)!) {
-            li.name = key.getHours().toString(); //TODO set name to proper hour & prevent function from running more than once
+    // for (const key of keysArray) {
+    //     // if message falls within time period, add to our object
+    //     if (messageTime > key && messageTime < TBM.get(key)!) {
+    //         li.name = key.getHours().toString(); //TODO set name to proper hour & prevent function from running more than once
 
-            // TODO increment busyness
-            // if(li.busynesslist?.find(msg.place))) {
+    //         // TODO increment busyness
+    //         // if(li.busynesslist?.find(msg.place))) {
 
-            // }
+    //         // }
 
 
-            //Append Line item to data if we have found a valid chat
-            setData((prevData) => [...prevData, li]); // TODO move this to somewhere that makse sense, this should only run several times not 
-        }
-    }
+    //         //Append Line item to data if we have found a valid chat
+    //         setData((prevData) => [...prevData, li]); // TODO move this to somewhere that makse sense, this should only run several times not 
+    //     }
+    // }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -84,7 +87,6 @@ export const MyScrollableChart: FC = () => {
 
                         // move time from Seconds to Milliseconds
                         msg.time = msg.time * 1000
-
                     }
                 })
 
@@ -110,7 +112,8 @@ export const MyScrollableChart: FC = () => {
                 }
 
 
-
+                //**************************************************************************************************************** */
+                // TODO populate data of type any[]
                 // Iterate through messages and place them in defined time periods
                 messages.forEach((msg) => {
                     const messageTime = new Date(msg.time); // Make Date object out of message time sent
@@ -123,6 +126,8 @@ export const MyScrollableChart: FC = () => {
 
 
                 });
+
+                //**************************************************************************************************************** */
 
                 // setData(transformedData);
             } catch (error) {
@@ -137,8 +142,8 @@ export const MyScrollableChart: FC = () => {
 
     // Transform Data into Line Objects
     console.log(data)
-    const lines = data.length > 0 ? (
-        Object.keys(data[0])
+    const lines = data!.length > 0 ? (
+        Object.keys(data![0])
             .filter(key => key !== 'name') // Skip the 'name' property as it corresponds to X-axis
             .map((key) => (
                 <Line
