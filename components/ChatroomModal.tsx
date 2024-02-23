@@ -132,15 +132,27 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           <div>
             <button onClick={() => {
               const msgRef = doc(firestore, "chats", msg.id);
-              updateDoc(msgRef, {
-                upVote: (msg.upVote)? msg.upVote + 1 : 1
-              });
+              const userId = currentUser.data.uid;
+
+              const q = query(collection(firestore, "chats"), where("upVoters", "array-contains", userId));
+              if (msg.upVoters == null || !q){
+                updateDoc(msgRef, {
+                  upVote: (msg.upVote)? msg.upVote + 1 : 1,
+                  upVoters: (msg.upVoters == null)? [userId] : msg.upVoters.add(userId),
+                });
+              }
             }} className="px-3"><FontAwesomeIcon icon={faCaretUp}/>{msg.upVote}</button>
             <button onClick={() => {
               const msgRef = doc(firestore, "chats", msg.id);
-              updateDoc(msgRef, {
-                downVote: (msg.downVote)? msg.downVote - 1 : -1
-              });
+              const userId = currentUser.data.uid;
+
+              const q = query(collection(firestore, "chats"), where("downVoters", "array-contains", userId));
+              if (msg.downVoters == null || !q){
+                updateDoc(msgRef, {
+                  downVote: (msg.downVote)? msg.downVote - 1 : -1,
+                  downVoters: (msg.downVoters == null)? [userId] : msg.downVoters.add(userId),
+                });
+              }
             }}><FontAwesomeIcon icon={faCaretDown}/>{msg.downVote}</button>
           </div> {/* Up and Down Vote */}
         </div>
@@ -190,7 +202,9 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                     place: place.id,
                     message,
                     time: Timestamp.now().seconds,
-                    uid: currentUser.data.uid
+                    uid: currentUser.data.uid,
+                    upVoters: [],
+                    downVoters: [],
                   });
                 }
                 setMessage("");
