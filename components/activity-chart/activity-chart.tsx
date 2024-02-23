@@ -23,8 +23,30 @@ interface LineItem {
 
 
 export const MyScrollableChart: FC = () => {
+    // Firestore 
     const [data, setData] = useState<LineItem[]>([]);
     const firestore = useFirestore();
+
+    // populate graph
+    const TBM: DateMap = new Map;
+    const keysArray = Array.from(TBM.keys());
+
+    // TODO reorganize location of this loop
+    for (const key of keysArray) {
+        // if message falls within time period, add to our object
+        if (messageTime > key && messageTime < TBM.get(key)!) {
+            li.name = key.getHours().toString(); //TODO set name to proper hour & prevent function from running more than once
+
+            // TODO increment busyness
+            // if(li.busynesslist?.find(msg.place))) {
+
+            // }
+
+
+            //Append Line item to data if we have found a valid chat
+            setData((prevData) => [...prevData, li]); // TODO move this to somewhere that makse sense, this should only run several times not 
+        }
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -69,7 +91,7 @@ export const MyScrollableChart: FC = () => {
                 const number_buckets = 10; // number of points on the graph
                 const period_size = 1;  // size of period in hours
                 // const bucket_labels = [] // 
-                const TBM: DateMap = new Map;
+
 
                 // Time period
                 const end = new Date(); // time now
@@ -88,28 +110,18 @@ export const MyScrollableChart: FC = () => {
                 }
 
 
-                const time = new Date()
-                const keysArray = Array.from(TBM.keys());
+
                 // Iterate through messages and place them in defined time periods
                 messages.forEach((msg) => {
                     const messageTime = new Date(msg.time); // Make Date object out of message time sent
 
                     // Create a Line item
-                    const li: LineItem = {}
-
-                    for (const key of keysArray) {
-                        // if message falls within time period
-                        if (messageTime > key && messageTime < TBM.get(key)!) {
-                            // li.msg.place : msg.time;
-                            li.name = key.getHours().toString();
-
-                            //Append Line item to data 
-                            setData((prevData) => [...prevData, li]);
-                        }
-
-
-
+                    const li: LineItem = {
+                        name: messageTime.toString(),
+                        busynesslist: []
                     }
+
+
                 });
 
                 // setData(transformedData);
