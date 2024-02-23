@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, MouseEventHandler, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +19,13 @@ import {
   documentId,
   where,
   addDoc,
+  updateDoc,
   Timestamp,
 } from "firebase/firestore";
 import { useFirestoreCollectionData, useFirestore, useUser } from "reactfire";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons";
 
 interface ChatroomModalProps {
   isOpen: boolean;
@@ -124,7 +127,35 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           <div>Anonymous</div> {/* Username */}
           <div>{getHumanReadableTime(msg.time)}</div> {/* Time */}
         </div>
-        <div>{msg.message}</div> {/* Message Content */}
+        <div className="flex items-center justify-between">
+          <div>{msg.message}</div> {/* Message Content */}
+          <div>
+            <button onClick={() => {
+              const msgRef = doc(firestore, "chats", msg.id);
+              const userId = currentUser.data.uid;
+
+              const q = query(collection(firestore, "chats"), where("upVoters", "array-contains", userId));
+              if (msg.upVoters == null || !q){
+                updateDoc(msgRef, {
+                  upVote: (msg.upVote)? msg.upVote + 1 : 1,
+                  upVoters: (msg.upVoters == null)? [userId] : msg.upVoters.add(userId),
+                });
+              }
+            }} className="px-3"><FontAwesomeIcon icon={faCaretUp}/>{msg.upVote}</button>
+            <button onClick={() => {
+              const msgRef = doc(firestore, "chats", msg.id);
+              const userId = currentUser.data.uid;
+
+              const q = query(collection(firestore, "chats"), where("downVoters", "array-contains", userId));
+              if (msg.downVoters == null || !q){
+                updateDoc(msgRef, {
+                  downVote: (msg.downVote)? msg.downVote - 1 : -1,
+                  downVoters: (msg.downVoters == null)? [userId] : msg.downVoters.add(userId),
+                });
+              }
+            }}><FontAwesomeIcon icon={faCaretDown}/>{msg.downVote}</button>
+          </div> {/* Up and Down Vote */}
+        </div>
       </div>
     ));
   };
@@ -172,6 +203,8 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                     message,
                     time: Timestamp.now().seconds,
                     uid: currentUser.data.uid,
+                    upVoters: [],
+                    downVoters: [],
                   });
                 }
                 setMessage("");
