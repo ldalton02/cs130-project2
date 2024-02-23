@@ -3,43 +3,116 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } f
 import { useFirestore } from 'reactfire';
 import { collection, query, getDocs } from 'firebase/firestore';
 
-interface ApiPlace {
-    place: number;
-}
 
-interface ApiDataItem {
-    places: ApiPlace;
+type PlaceMapType = Map<String, String>;
+type DateMap = Map<Date, Date>; // start -> end
+type BusynessMap = Map<String, number>
+
+interface ChatObject {
+    message: String;
+    place: String;
     time: number;
-    id: string;
+    uid: String;
 }
 
-interface TransformedDataItem {
-    name: string;
-    YRL: number;
+interface LineItem {
+    name?: string;
+    busynesslist?: BusynessMap[]
 }
+
+
 
 export const MyScrollableChart: FC = () => {
-    const [data, setData] = useState<TransformedDataItem[]>([]);
+    const [data, setData] = useState<LineItem[]>([]);
     const firestore = useFirestore();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const messagesCollection = collection(firestore, 'history');
-                const messageQuery = query(messagesCollection);
-                const querySnapshot = await getDocs(messageQuery);
+                // Declare Firebase query
+                const placesCollection = collection(firestore, 'places');
+                const placesQuery = query(placesCollection);
+                const placeSnapshot = await getDocs(placesQuery);
+                const placemap: PlaceMapType = new Map();
 
-                const messages: ApiDataItem[] = [];
-                querySnapshot.forEach((doc) => {
-                    messages.push({ ...doc.data(), id: doc.id } as ApiDataItem);
+                // Create map of Place ID -> Real Place Name
+                placeSnapshot.forEach((doc) => {
+                    placemap.set(doc.id, doc.data().name);
                 });
 
-                const transformedData: TransformedDataItem[] = messages.map(item => ({
-                    name: new Date(item.time).toLocaleString(),
-                    YRL: item.places.place,
-                }));
+                // Declare Firebase query
+                const messagesCollection = collection(firestore, 'chats');
+                const messageQuery = query(messagesCollection);
+                const chatSnapshot = await getDocs(messageQuery);
+                const messages: ChatObject[] = [];
+                //TODO Set a Max # of chats to get
 
-                setData(transformedData);
+                // Create List of Chats 
+                chatSnapshot.forEach((doc) => {
+                    messages.push({ ...doc.data() } as ChatObject);
+                });
+
+
+                // Repalce 'Place' with real place from firestore
+                messages.forEach((msg) => {
+                    if (placemap.has(msg.place)) {
+                        // replace Place
+                        const realPlace = placemap.get(msg.place);
+                        msg.place = realPlace!;
+
+                        // move time from Seconds to Milliseconds
+                        msg.time = msg.time * 1000
+
+                    }
+                })
+
+                const number_buckets = 10; // number of points on the graph
+                const period_size = 1;  // size of period in hours
+                // const bucket_labels = [] // 
+                const TBM: DateMap = new Map;
+
+                // Time period
+                const end = new Date(); // time now
+                const start = new Date();  // time bucket_size hours ago
+
+                // Adjust end based on the current iteration
+                start.setHours(start.getHours() - period_size);
+
+                for (let i = 1; i < number_buckets; i++) {
+                    // add time to list
+                    TBM.set(new Date(start), new Date(end));
+
+                    // Decrement both
+                    start.setHours(start.getHours() - 1);
+                    end.setHours(end.getHours() - 1);
+                }
+
+
+                const time = new Date()
+                const keysArray = Array.from(TBM.keys());
+                // Iterate through messages and place them in defined time periods
+                messages.forEach((msg) => {
+                    const messageTime = new Date(msg.time); // Make Date object out of message time sent
+
+                    // Create a Line item
+                    const li: LineItem = {}
+
+                    for (const key of keysArray) {
+                        // if message falls within time period
+                        if (messageTime > key && messageTime < TBM.get(key)!) {
+                            // li.msg.place : msg.time;
+                            li.name = key.getHours().toString();
+
+                            //Append Line item to data 
+                            setData((prevData) => [...prevData, li]);
+                        }
+
+
+
+                    }
+                });
+
+                // setData(transformedData);
             } catch (error) {
                 console.error('Error fetching data from Firebase:', error);
             }
@@ -48,6 +121,10 @@ export const MyScrollableChart: FC = () => {
         fetchData();
     }, []); // Empty dependency array 
 
+
+
+    // Transform Data into Line Objects
+    console.log(data)
     const lines = data.length > 0 ? (
         Object.keys(data[0])
             .filter(key => key !== 'name') // Skip the 'name' property as it corresponds to X-axis
@@ -56,10 +133,12 @@ export const MyScrollableChart: FC = () => {
                     key={key}
                     type="monotone"
                     dataKey={key}
-                    stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`} // Random color for each line
+                    stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
                 />
             ))
     ) : null;
+
+    console.log(lines)
 
     return (
         <div className="w-full overflow-x-auto">
