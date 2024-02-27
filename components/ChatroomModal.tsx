@@ -9,11 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  getFirestore,
   collection,
-  getDocs,
-  QueryDocumentSnapshot,
-  doc,
   orderBy,
   query,
   documentId,
@@ -23,6 +19,7 @@ import {
 } from "firebase/firestore";
 import { useFirestoreCollectionData, useFirestore, useUser } from "reactfire";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
+import { getAnimalEmoji } from "@/assets/values/userAnimals";
 
 interface ChatroomModalProps {
   isOpen: boolean;
@@ -30,6 +27,8 @@ interface ChatroomModalProps {
   setPlace: (place: any) => void;
   place: any;
   closestMarkerIndex: string[] | null;
+  userUID: string;
+  userAnimal: string;
 }
 
 const getHumanReadableTime = (database_date: any) => {
@@ -66,39 +65,46 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
   place,
   setPlace,
   closestMarkerIndex,
+  userUID,
+  userAnimal
 }) => {
   if (!place) {
     return null;
   }
-
-  // TODO(ldalton02): set closing functionality to clear place
-  const [message, setMessage] = useState("");
-  const isLoading = false;
-
+  // Hooks/Firestore Setup
   const firestore = useFirestore();
-  const currentUser = useUser();
   const messagesCollection = collection(firestore, "chats");
 
-  const currentDate = new Date();
+  // User input state variables
+  const [message, setMessage] = useState("");
 
+  // General state variables
+  const [loading, setLoading] = useState(false) // possible future need for better loading state
+
+  // Setup firestore Query
+  const currentDate = new Date();
   // Subtract 24 hours from the current date
   currentDate.setHours(currentDate.getHours() - 24);
   const messageQuery = query(
     messagesCollection,
     where("place", "==", `${place.id}`),
     where("time", ">=", Timestamp.fromDate(currentDate).seconds),
+    where("time", "<=", Timestamp.now().seconds),
     orderBy("time", "asc")
   );
 
+  // Query firestore
   const { status, data: messages } = useFirestoreCollectionData(messageQuery, {
     idField: "id",
   });
 
+  // Change status of chatroom popup
   const openChange = (open: any) => {
     setPlace(null);
     setIsOpen(open);
   };
 
+  // JSX function to generate all messages queried above 
   const scrollMessages = () => {
     if (!messages) {
       return (
@@ -121,13 +127,17 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
         key={`${msg.uid}-${msg.time}`}
       >
         <div className="flex items-center justify-between">
-          <div>Anonymous</div> {/* Username */}
+          <div>Anonymous {msg?.animal} {msg.animal ? getAnimalEmoji(msg.animal) : ""}</div> {/* Username */}
           <div>{getHumanReadableTime(msg.time)}</div> {/* Time */}
         </div>
         <div>{msg.message}</div> {/* Message Content */}
       </div>
     ));
   };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={openChange}>
@@ -158,20 +168,21 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
             <Input
               value={message}
               onChange={(e) => setMessage(e.currentTarget.value)}
-              disabled={isLoading}
+              disabled={loading}
               type="text"
               required
               className="border border-solid border border-black focus:outline-none focus-visible:ring-0"
             />
             <Button
-              disabled={isLoading}
+              disabled={loading}
               onClick={() => {
                 if (message.length > 0) {
                   addDoc(collection(firestore, "chats"), {
                     place: place.id,
                     message,
                     time: Timestamp.now().seconds,
-                    uid: currentUser.data.uid,
+                    uid: userUID,
+                    animal: userAnimal
                   });
                 }
                 setMessage("");

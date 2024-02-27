@@ -26,7 +26,7 @@ const formSchema = z.object({
 
 interface SignUpFormProps {
   onShowLogin: () => void;
-  onSignUp?: () => void;
+  onSignUp?: (uid: any) => void;
 }
 
 export const SignUpForm: FC<SignUpFormProps> = ({ onShowLogin, onSignUp }) => {
@@ -49,7 +49,8 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onShowLogin, onSignUp }) => {
       if (user?.user.uid && user.user.email) {
         // create user in firestore here if you want
         toast({ title: "Account created!" });
-        onSignUp?.();
+        // Perform onSignUp function, creating custom user data
+        onSignUp?.(user.user.uid);
       }
     } catch (err: any) {
       if ("code" in err && err.code.includes("already")) {

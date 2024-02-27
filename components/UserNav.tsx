@@ -27,6 +27,10 @@ export const UserNav: FC = () => {
     router.push("/");
   };
 
+  const goToPreferences = () => {
+    router.push("/preferences");
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -67,6 +71,7 @@ export const UserNav: FC = () => {
           <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator /> */}
+        <DropdownMenuItem onClick={goToPreferences}>Preferences</DropdownMenuItem>
         <DropdownMenuItem onClick={doLogout}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -9,12 +9,22 @@ import {
 } from "@/components/ui/card";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useUser } from "reactfire";
+import { useFirestore, useUser } from "reactfire";
+import { addDoc, collection } from "firebase/firestore";
+import { getRandomAnimal } from "@/assets/values/userAnimals";
 
 export default function LoginPage() {
   const [isShowingSignUp, setIsShowingSignUp] = useState<boolean>(false);
   const { data: user } = useUser();
   const router = useRouter();
+  const firestore = useFirestore();
+
+  const createAnimalForUser = (uid: any) => {
+    addDoc(collection(firestore, "userdata"), {
+      uid: uid,
+      animal: getRandomAnimal()
+    });
+  };
 
   useEffect(() => {
     if (user) {
@@ -37,7 +47,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             {isShowingSignUp ? (
-              <SignUpForm onShowLogin={() => setIsShowingSignUp(false)} />
+              <SignUpForm
+                onSignUp={createAnimalForUser}
+                onShowLogin={() => setIsShowingSignUp(false)}
+              />
             ) : (
               <SignInForm onShowSignUp={() => setIsShowingSignUp(true)} />
             )}
