@@ -1,23 +1,24 @@
 import React, { FC, useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useFirestore } from 'reactfire';
+import { useFirestore, useObservable } from 'reactfire';
 import { collection, query, getDocs } from 'firebase/firestore';
 
 
-type PlaceMapType = Map<String, String>;
+type PlaceMapType = Map<string, string>;
 type DateMap = Map<Date, Date>; // start -> end
 type BusynessMap = Map<String, number>
 
-interface ChatObject {
-    message: String;
-    place: String;
-    time: number;
-    uid: String;
+interface PreData {
+    times: Map<String, number>,
+    place_name: String,
+    data_id: String,
 }
 
-interface LineItem {
-    name?: string;
-    busynesslist?: BusynessMap[]
+interface ChatObject {
+    message: String;
+    place: string;
+    time: number;
+    uid: String;
 }
 
 // data to pass to
@@ -25,8 +26,8 @@ type DataBlock = any[]
 
 
 export const MyScrollableChart: FC = () => {
-    // Firestore 
-    const [data, setData] = useState<DataBlock>();
+    const [data, setData] = useState<DataBlock>(); // data block
+    const [lines, setLines] = useState<DataBlock>();
     const firestore = useFirestore();
 
     // populate graph
@@ -70,9 +71,10 @@ export const MyScrollableChart: FC = () => {
                 const messageQuery = query(messagesCollection);
                 const chatSnapshot = await getDocs(messageQuery);
                 const messages: ChatObject[] = [];
-                //TODO Set a Max # of chats to get
+                const predataMap: Map<string, PreData> = new Map();
 
-                // Create List of Chats 
+
+                // Get List of Chats //TODO Set a Max # of chats to get ?
                 chatSnapshot.forEach((doc) => {
                     messages.push({ ...doc.data() } as ChatObject);
                 });
@@ -82,54 +84,89 @@ export const MyScrollableChart: FC = () => {
                 messages.forEach((msg) => {
                     if (placemap.has(msg.place)) {
                         // replace Place
-                        const realPlace = placemap.get(msg.place);
-                        msg.place = realPlace!;
+                        const realPlace = placemap.get(msg.place)!;
 
-                        // move time from Seconds to Milliseconds
-                        msg.time = msg.time * 1000
+                        msg.place = realPlace
                     }
                 })
 
-                const number_buckets = 10; // number of points on the graph
-                const period_size = 1;  // size of period in hours
-                // const bucket_labels = [] // 
+                // create array of PreData to be processed before stored statefully
+                messages.forEach(msg => {
+                    let p: PreData = {
+                        place_name: msg.place,
+                        data_id: msg.place.replaceAll(' ', '_'),
+                        times: new Map()
+                    }
+                    predataMap.set(msg.place, p)
+                })
+
+                const data_points = 6; // number of points on the graph
+                const time_frame = 2;  // size of period in hours
+                const loop_length = data_points * time_frame;
 
 
                 // Time period
+                const start = new Date();  // time period_size hours ago
+                start.setHours(start.getHours() - time_frame) // increment to period_size hours ago
                 const end = new Date(); // time now
-                const start = new Date();  // time bucket_size hours ago
 
-                // Adjust end based on the current iteration
-                start.setHours(start.getHours() - period_size);
+                // generate hour_marks time points for the graph
+                for (let i = time_frame; i < loop_length; i += time_frame) {
+                    //name current time period
+                    const time_period_name = i.toString() + " Hours Ago";
 
-                for (let i = 1; i < number_buckets; i++) {
-                    // add time to list
-                    TBM.set(new Date(start), new Date(end));
+                    messages.forEach(msg => {
+                        // Create Date object of message time
+                        const msgDate: Date = new Date()
+                        msgDate.setTime(msg.time)
 
-                    // Decrement both
-                    start.setHours(start.getHours() - 1);
-                    end.setHours(end.getHours() - 1);
+                        // check if Date Object is between the times we are iterating through
+                        if (msgDate > start && msgDate < end) {
+
+                            // Update value in appropriate PreData Object -> 
+                            // if this time range already exists -> increment value
+                            // if this time range does not exist, add it and set to 1
+                            if (predataMap.get(msg.place)?.times.get(time_period_name)) {
+                                predataMap.get(msg.place)?.times.set(time_period_name, predataMap.get(msg.place)?.times.get(time_period_name)! + 1)
+                            } else {
+                                predataMap.get(msg.place)?.times.set(time_period_name, 1)
+                            }
+                        }
+                    })
+
+                    // Decrement both by period_size
+                    start.setHours(start.getHours() - time_frame);
+                    end.setHours(end.getHours() - time_frame);
                 }
+                let tempdatablock: any[] = []
+
+                // Generate Data Object
+                for (let i = time_frame; i < loop_length; i += time_frame) {
+                    const time_period_name = i.toString() + " Hours Ago";
+
+                    let obj: any = new Object();
+                    obj.name = time_period_name
+
+                    predataMap.forEach(element => {
+                        if (element.times.has(time_period_name)) {
+                            obj[element.data_id as string] = element.times.get(time_period_name)!
+                        } else {
+                            obj[element.data_id as string] = 0
+                        }
+                    })
+                    tempdatablock.push(obj)
+                }
+                tempdatablock = tempdatablock.reverse() // reverse 
+                setData(tempdatablock); // store processed state
 
 
-                //**************************************************************************************************************** */
-                // TODO populate data of type any[]
-                // Iterate through messages and place them in defined time periods
-                messages.forEach((msg) => {
-                    const messageTime = new Date(msg.time); // Make Date object out of message time sent
-
-                    // Create a Line item
-                    const li: LineItem = {
-                        name: messageTime.toString(),
-                        busynesslist: []
-                    }
-
-
+                // Generate Lines object
+                let templines: any[] = []
+                predataMap.forEach(element => {
+                    templines.push(element.data_id)
                 });
+                setLines(templines) // store statefully
 
-                //**************************************************************************************************************** */
-
-                // setData(transformedData);
             } catch (error) {
                 console.error('Error fetching data from Firebase:', error);
             }
@@ -140,12 +177,10 @@ export const MyScrollableChart: FC = () => {
 
 
 
-    // Transform Data into Line Objects
-    console.log(data)
-    const lines = data!.length > 0 ? (
-        Object.keys(data![0])
-            .filter(key => key !== 'name') // Skip the 'name' property as it corresponds to X-axis
-            .map((key) => (
+    // Transform lines into Line Objects
+    const LineObjects = (
+        lines
+            ? lines.map((key) => (
                 <Line
                     key={key}
                     type="monotone"
@@ -153,14 +188,13 @@ export const MyScrollableChart: FC = () => {
                     stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
                 />
             ))
-    ) : null;
-
-    console.log(lines)
+            : null
+    );
 
     return (
         <div className="w-full overflow-x-auto">
             <div className="flex items-center justify-center h-full">
-                <h1 className="text-center">Current Popularity</h1>
+                <h1 className="text-center">Chatroom Activity!</h1>
             </div>
 
             <ResponsiveContainer width="100%" height={400}>
@@ -169,7 +203,8 @@ export const MyScrollableChart: FC = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    {lines}
+                    {LineObjects}
+
                 </LineChart>
             </ResponsiveContainer>
         </div>
