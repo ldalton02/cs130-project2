@@ -5,8 +5,6 @@ import { collection, query, getDocs } from 'firebase/firestore';
 
 
 type PlaceMapType = Map<string, string>;
-type DateMap = Map<Date, Date>; // start -> end
-type BusynessMap = Map<String, number>
 
 interface PreData {
     times: Map<String, number>,
@@ -29,28 +27,6 @@ export const MyScrollableChart: FC = () => {
     const [data, setData] = useState<DataBlock>(); // data block
     const [lines, setLines] = useState<DataBlock>();
     const firestore = useFirestore();
-
-    // populate graph
-    const TBM: DateMap = new Map;
-    const keysArray = Array.from(TBM.keys());
-
-
-    // TODO reorganize location of this loop
-    // for (const key of keysArray) {
-    //     // if message falls within time period, add to our object
-    //     if (messageTime > key && messageTime < TBM.get(key)!) {
-    //         li.name = key.getHours().toString(); //TODO set name to proper hour & prevent function from running more than once
-
-    //         // TODO increment busyness
-    //         // if(li.busynesslist?.find(msg.place))) {
-
-    //         // }
-
-
-    //         //Append Line item to data if we have found a valid chat
-    //         setData((prevData) => [...prevData, li]); // TODO move this to somewhere that makse sense, this should only run several times not 
-    //     }
-    // }
 
     useEffect(() => {
         const fetchData = async () => {
