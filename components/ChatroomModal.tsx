@@ -47,19 +47,11 @@ const getHumanReadableTime = (database_date: any) => {
     currentDate.getDate() === messageDate.getDate()
   ) {
     // If the message date is today, display "Today"
-<<<<<<< HEAD
     let hour_minute = new Date(database_date).toLocaleString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
     })
     return String(hour_minute) + ' Today';
-=======
-    let hour_minute = new Date(database_date * 1000).toLocaleString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return String(hour_minute) + " Today";
->>>>>>> main
   } else {
     // If the message date is older, display the full date
     const humanReadableTime = messageDate.toLocaleString(undefined, {
@@ -191,31 +183,9 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
         </DialogHeader>
         <div className="h-5/6 overflow-auto flex flex-col-reverse">
           {status != "loading" && (
-<<<<<<< HEAD
-            <ScrollArea.Root className="w-full h-full">
-              <ScrollArea.Viewport className="w-full h-full rounded">
-                <div className="py-[15px] px-5">
-                  {messages.map((msg) => (
-                    <div
-                      className="text-mauve12 text-[13px] leading-[18px] mt-2.5 pt-2.5 border-t border-t-mauve6"
-                      key={msg.uid}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>Anonymous</div> {/* Username */}
-                        <div>
-                          {getHumanReadableTime(msg.time)}
-                        </div>{" "}
-                        {/* Time */}
-                      </div>
-                      <div>{msg.message}</div> {/* Message Content */}
-                    </div>
-                  ))}
-                </div>
-=======
             <ScrollArea.Root type="hover" className="">
               <ScrollArea.Viewport className="w-full h-full rounded flex flex-col-reverse">
                 <div className="py-[15px] px-5">{scrollMessages()}</div>
->>>>>>> main
               </ScrollArea.Viewport>
               <ScrollArea.Scrollbar
                 className="flex select-none touch-none p-0.5 bg-blackA3 transition-colors duration-[160ms] ease-out hover:bg-blackA5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
@@ -227,34 +197,6 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
             </ScrollArea.Root>
           )}
         </div>
-<<<<<<< HEAD
-        <div className="flex flex-row items-end gap-2 text-center h-min">
-          {/*TODO(ldalton02): add list here */}
-          <Input
-            value={message}
-            onChange={(e) => setMessage(e.currentTarget.value)}
-            disabled={isLoading}
-            type="text"
-            required
-            className="border border-solid border border-black focus:outline-none focus-visible:ring-0"
-          />
-          <Button
-            disabled={isLoading}
-            onClick={() => {
-              addDoc(collection(firestore, "chats"), {
-                place: place.id,
-                message,
-                time: new Date().getTime(),
-                uid: currentUser.data!.uid,
-              });
-              setMessage("")
-            }}
-          >
-            {" "}
-            Send
-          </Button>
-        </div>
-=======
         {/* (stovsky) set to true for testing purposes to test all chats*/}
         {false || closestMarkerIndex?.includes(place.name) ? (
           <div className="flex flex-row items-end gap-2 text-center h-min">
@@ -295,7 +237,6 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
             </p>
           </div>
         )}
->>>>>>> main
       </DialogContent>
     </Dialog>
   );

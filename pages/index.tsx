@@ -156,6 +156,9 @@ export default function Home() {
         place={place}
         closestMarkerIndex={closestMarker}
       />
+      <div className="h-h-full flex flex-col justify-center items-center pb-8 pt-6 md:pb-12 md:pt-10">
+        <MyScrollableChart />
+      </div>
     </div>
   );
 }
