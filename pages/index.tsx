@@ -7,6 +7,7 @@ import {
   where,
   getDocs,
   QueryDocumentSnapshot,
+  Timestamp
 } from "firebase/firestore";
 import {
   useFirestore,
@@ -131,6 +132,10 @@ export default function Home() {
             markers={
               // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
               places
+            }
+            // TODO make another thing here to pass in chats
+            activities={
+              activities
             }
             notSignedIn={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
