@@ -26,7 +26,7 @@ export const images = {
   bar_orange: "https://svgshare.com/i/13Ae.svg",
   bar_green: "https://svgshare.com/i/13AG.svg",
   default: "https://svgshare.com/i/13Ao.svg",
-
+  user_location: "https://svgshare.com/i/13UT.svg",
 }
 
 export default {}

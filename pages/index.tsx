@@ -4,11 +4,16 @@ import {
   collection,
   orderBy,
   query,
+  where,
+  getDocs,
+  QueryDocumentSnapshot,
 } from "firebase/firestore";
+
 import {
   useFirestore,
   useFirestoreCollectionData,
-  useSigninCheck
+  useSigninCheck,
+  useUser,
 } from "reactfire";
 
 import { ChatroomModal } from "@/components/ChatroomModal";
@@ -24,14 +29,23 @@ import { MyScrollableChart } from '../components/activity-chart/activity-chart'
 import { useToast } from "@/components/ui/use-toast";
 
 export default function Home() {
+  // Hooks
+  const { toast, dismiss } = useToast();
+  const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
+  const { data: user } = useUser();
+
+  // State variables
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   }>({ lat: 34.0699, lng: -118.4438 });
-
+  const [closestMarker, setClosestMarker] = useState<string[] | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
-  const { toast, dismiss } = useToast();
+  const [userUID, setUserUID] = useState("");
+  const [userAnimal, setUserAnimal] = useState("");
+  const [loading, setLoading] = useState(true);
+
   const dismissToast = () => {
     dismiss(); // Dismiss all toasts
   };
@@ -43,20 +57,20 @@ export default function Home() {
 
     setTimeout(() => {
       dismissToast();
-    }, 3000)
+    }, 3000);
   };
 
-  // START: reactfire Hooks to subscribe to places database:
+  // Reactfire Hooks
   const firestore = useFirestore();
   const placesCollection = collection(firestore, "places");
   const placesQuery = query(placesCollection, orderBy("name", "asc"));
   // Fetch places data from Firestore
-  const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(placesQuery, {
-    idField: "id",
-  });
-  const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
-
-  // END
+  const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(
+    placesQuery,
+    {
+      idField: "id",
+    }
+  );
 
   // Manually get user location
   useEffect(() => {
@@ -78,9 +92,39 @@ export default function Home() {
     }
   }, []);
 
+  // Fetch userdata
+  const getUserAnimal = async () => {
+
+    const userDataCollection = collection(firestore, "userdata");
+
+    const messageQuery = query(
+      userDataCollection,
+      where("uid", "==", user?.uid)
+    );
+
+    const querySnapshot = await getDocs(messageQuery);
+
+    // Process query result
+    const userDataDocs = querySnapshot.docs.map((doc: QueryDocumentSnapshot) =>
+      doc.data()
+    );
+
+    let result = userDataDocs[0]; // Assuming there's only one document matching the query
+
+    setUserAnimal(result.animal);
+    setLoading(false)
+  };
+
+  useEffect(() => {
+    if (user) {
+      setUserUID(user?.uid);
+      getUserAnimal()
+    }
+  }, [user]);
+
   // TODO(ldalton02): create better loading status...
-  if (placeQueryStatus == 'loading' || signInStatus == 'loading') {
-    return <p>loading</p>
+  if (placeQueryStatus == "loading" || signInStatus == "loading" || loading) {
+    return <p>Loading...</p>;
   }
 
   return (
@@ -97,15 +141,21 @@ export default function Home() {
               // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
               places
             }
-            notSignedIn={showToast}
+            In={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
+            onMarkerChange={setClosestMarker}
           />
         </div>
       </section>
-      <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} />
-      <div className="h-h-full flex flex-col justify-center items-center pb-8 pt-6 md:pb-12 md:pt-10">
-        <MyScrollableChart />
-      </div>
+      <ChatroomModal
+        userUID={userUID}
+        userAnimal={userAnimal}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        setPlace={setPlace}
+        place={place}
+        closestMarkerIndex={closestMarker}
+      />
     </div>
   );
 }
