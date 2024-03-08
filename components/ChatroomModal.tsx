@@ -47,11 +47,11 @@ const getHumanReadableTime = (database_date: any) => {
     currentDate.getDate() === messageDate.getDate()
   ) {
     // If the message date is today, display "Today"
-    let hour_minute = new Date(database_date * 1000).toLocaleString(undefined, {
+    let hour_minute = new Date(database_date).toLocaleString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
-    });
-    return String(hour_minute) + " Today";
+    })
+    return String(hour_minute) + ' Today';
   } else {
     // If the message date is older, display the full date
     const humanReadableTime = messageDate.toLocaleString(undefined, {
