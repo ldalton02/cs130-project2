@@ -7,8 +7,8 @@ import {
   where,
   getDocs,
   QueryDocumentSnapshot,
-  Timestamp
 } from "firebase/firestore";
+
 import {
   useFirestore,
   useFirestoreCollectionData,
@@ -92,17 +92,23 @@ export default function Home() {
 
   // Fetch userdata
   const getUserAnimal = async () => {
+
     const userDataCollection = collection(firestore, "userdata");
+
     const messageQuery = query(
       userDataCollection,
       where("uid", "==", user?.uid)
     );
+
     const querySnapshot = await getDocs(messageQuery);
+
     // Process query result
     const userDataDocs = querySnapshot.docs.map((doc: QueryDocumentSnapshot) =>
       doc.data()
     );
+
     let result = userDataDocs[0]; // Assuming there's only one document matching the query
+
     setUserAnimal(result.animal);
     setLoading(false)
   };
@@ -133,11 +139,7 @@ export default function Home() {
               // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
               places
             }
-            // TODO make another thing here to pass in chats
-            activities={
-              activities
-            }
-            notSignedIn={showToast}
+            In={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
             onMarkerChange={setClosestMarker}
           />

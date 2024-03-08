@@ -8,11 +8,15 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
 import {
   collection,
   orderBy,
   query,
   documentId,
+  getDocs,
+  QueryDocumentSnapshot,
+  doc,
   where,
   addDoc,
   updateDoc,
@@ -76,6 +80,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
   }
   // Hooks/Firestore Setup
   const firestore = useFirestore();
+  const currentUser = useUser();
   const messagesCollection = collection(firestore, "chats");
 
   // User input state variables
@@ -138,7 +143,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           <div>
             <button onClick={() => {
               const msgRef = doc(firestore, "chats", msg.id);
-              const userId = currentUser.data.uid;
+              const userId = currentUser.data!.uid;
 
               const q = query(collection(firestore, "chats"), where("upVoters", "array-contains", userId));
               if (msg.upVoters == null || !q) {
@@ -150,7 +155,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
             }} className="px-3"><FontAwesomeIcon icon={faCaretUp} />{msg.upVote}</button>
             <button onClick={() => {
               const msgRef = doc(firestore, "chats", msg.id);
-              const userId = currentUser.data.uid;
+              const userId = currentUser.data!.uid;
 
               const q = query(collection(firestore, "chats"), where("downVoters", "array-contains", userId));
               if (msg.downVoters == null || !q) {
@@ -213,7 +218,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                     message,
                     time: Timestamp.now().seconds,
                     uid: userUID,
-                    animal: userAnimal
+                    animal: userAnimal,
                     upVoters: [],
                     downVoters: [],
                   });
