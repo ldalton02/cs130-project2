@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { images } from '../assets/index';
-import { Button } from '@/components/ui/button';
-import { InfoWindow } from "@react-google-maps/api";
 
 interface GoogleMapProps {
   apiKey: string;
   center: { lat: number; lng: number };
+  selectedLocation: { lat: number; lng: number };
   zoom?: number;
   className?: string;
   style?: React.CSSProperties;
@@ -20,12 +19,14 @@ interface GoogleMapProps {
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
   onMarkerChange: (index: string[] | null) => void;
+
 }
 
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
   center,
-  zoom = 15,
+  selectedLocation,
+  zoom = selectedLocation ? 20 : 15,
   className,
   style,
   streetViewControl = false,
@@ -48,19 +49,19 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
     script.defer = true;
     script.onload = initMap;
     document.head.appendChild(script);
-
+  
     function initMap() {
       if (!mapRef.current || !markers || markers.length === 0) return;
-    
+  
       const map = new google.maps.Map(mapRef.current, {
-        center,
+        center: selectedLocation || center, // Use selectedLocation if available, otherwise use center
         zoom,
         streetViewControl,
         clickableIcons,
         maxZoom,
         minZoom,
       });
-    
+  
       // Add marker for the user's location
       const userMarker = new google.maps.Marker({
         position: center,
@@ -68,16 +69,16 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         animation: google.maps.Animation.DROP,
         icon: images["user_location"], // Provide the appropriate image for the user's location marker
       });
-    
+  
       // Calculate distances from user location to each marker
       const distances = markers.map((marker) => {
         const markerLocation = new google.maps.LatLng(marker.location._lat, marker.location._long);
         return {
           index: marker.name, // Store the index of the marker
-          distance: google.maps.geometry.spherical.computeDistanceBetween(center, markerLocation)
+          distance: google.maps.geometry.spherical.computeDistanceBetween(center, markerLocation) 
         };
       });
-    
+  
       // Find markers within {threshold} meters and store their indices
       const closestMarkersIndices : string[] = [];
       const thresholdDistance = 200; // Adjust the threshold distance as needed
@@ -86,10 +87,10 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           closestMarkersIndices.push(item.index);
         }
       });
-    
+  
       // Invoke the callback function with the closestMarkersIndices
       onMarkerChange(closestMarkersIndices.length > 0 ? closestMarkersIndices : null);
-    
+  
       // Add markers to the map
       markers.forEach((marker, index) => {
         const iconMarker = new google.maps.Marker({
@@ -98,7 +99,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           animation: google.maps.Animation.DROP,
           icon: images[`${marker.type}_green`],
         });
-    
+  
         iconMarker.addListener("click", () => {
           if (signInCheckResult) {
             setPlace(marker);
@@ -109,16 +110,16 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         });
       });
     }
-    
-    
-
+  
     return () => {
       // Clean up the script tag when the component unmounts
       document.head.removeChild(script);
     };
-  }, [apiKey, center, zoom, markers]);
+  }, [apiKey, center, zoom, markers, selectedLocation]); // Add selectedLocation to dependency array
+  
 
   return (
+    
     <div
       ref={mapRef}
       className={className}
