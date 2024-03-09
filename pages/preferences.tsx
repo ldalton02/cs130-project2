@@ -1,3 +1,6 @@
+/**
+ * Outlines various states and user data collection specifications.
+ */
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Select from "@/components/ui/select";
@@ -18,6 +21,10 @@ import {
 import { useFirestore, useUser } from "reactfire";
 import { toast } from "@/components/ui/use-toast";
 
+/**
+ * Creates and specifies user preferences
+ * @returns user preferences
+ */
 export default function userSettings() {
   // Hooks + fireStore setup
   const { data: user } = useUser();

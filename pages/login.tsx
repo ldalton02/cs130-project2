@@ -1,3 +1,6 @@
+/**
+ * Allows for login and collecting user data, including creating an animal icon.
+ */
 import { SignInForm } from "@/components/auth/SignInForm";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import {
@@ -13,6 +16,10 @@ import { useFirestore, useUser } from "reactfire";
 import { addDoc, collection } from "firebase/firestore";
 import { getRandomAnimal } from "@/assets/values/userAnimals";
 
+/**
+ * Prompts sign in, collects user data upon login.
+ * @returns login prompts and user data
+ */
 export default function LoginPage() {
   const [isShowingSignUp, setIsShowingSignUp] = useState<boolean>(false);
   const { data: user } = useUser();

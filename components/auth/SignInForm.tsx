@@ -1,3 +1,6 @@
+/**
+ * Allows a user to enter an email and password and sign in to their account.
+ */
 import * as React from "react";
 import {
   Form,
@@ -27,6 +30,11 @@ interface SignInFormProps {
   onShowSignUp: () => void;
 }
 
+/**
+ * Navigates states of users being signed in or not, allowes to take in username and password.
+ * @param param0 
+ * @returns sign in interface allowing a user to sign in with credentials
+ */
 export const SignInForm: FC<SignInFormProps> = ({ onShowSignUp }) => {
   const auth = useAuth();
   const [isResetOpen, setIsResetOpen] = useState(false);

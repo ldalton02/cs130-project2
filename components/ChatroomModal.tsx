@@ -1,3 +1,6 @@
+/**
+ * Create chatroom pop ups that appear when a location is clicked on.
+ */
 import React, { FC, MouseEventHandler, useState } from "react";
 import {
   Dialog,
@@ -35,6 +38,11 @@ interface ChatroomModalProps {
   userAnimal: string;
 }
 
+/**
+ * Takes  chat dates from the chatroom history and adds a timestamp.
+ * @param database_date 
+ * @returns a human readable time
+ */
 const getHumanReadableTime = (database_date: any) => {
   const currentDate = new Date();
   const messageDate = new Date(database_date * 1000);
@@ -63,6 +71,11 @@ const getHumanReadableTime = (database_date: any) => {
   }
 };
 
+/**
+ * Takes in chat data affiliated with a certain place and displays it
+ * @param param0 
+ * @returns a chatroom pop up display with recent chat data showing
+ */
 export const ChatroomModal: FC<ChatroomModalProps> = ({
   isOpen,
   setIsOpen,

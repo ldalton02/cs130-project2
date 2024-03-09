@@ -1,3 +1,6 @@
+/**
+ * Default "sales page" code
+ */
 import {
   Avatar,
   AvatarFallback,

@@ -1,3 +1,6 @@
+/**
+ * Create guidelines for home page.
+ */
 import GoogleMap from "./googlemap";
 import { useEffect, useState } from "react";
 import {
@@ -29,6 +32,12 @@ import { MyScrollableChart } from '../components/activity-chart/activity-chart'
 import { useToast } from "@/components/ui/use-toast";
 import { Autocomplete, TextField } from "@mui/material";
 
+/**
+ * Collects firebase data to be rendered in the homepage.
+ * Performs user geolocation.
+ * Analyzes database data for analytics purposes.
+ * @returns homepage props, including user information and map data
+ */
 export default function Home() {
   // Hooks
   const { toast, dismiss } = useToast();

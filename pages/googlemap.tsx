@@ -1,3 +1,6 @@
+/**
+ * Create and render google map component on homepage of site.
+ */
 import { useEffect, useRef } from 'react';
 import { images } from '../assets/index';
 
@@ -22,6 +25,13 @@ interface GoogleMapProps {
   onMarkerChange: (index: string[] | null) => void;
 }
 
+/**
+ * Use Google Maps api to create map image and geolocate user.
+ * Use firebase location data to create markers at specified location.
+ * Assign location color based on activity level.
+ * @param param0 
+ * @returns google map component with places
+ */
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
   center,

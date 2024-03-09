@@ -1,3 +1,7 @@
+/**
+ * Establishes guidelines on functio of the app.
+ * @returns html message on usage
+ */
 export default function HowItWorks() {
 
     const styles = `
