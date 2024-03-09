@@ -16,13 +16,15 @@ interface GoogleMapProps {
   disableDefaultUI?: boolean;
   maxZoom?: number;
   minZoom?: number;
-  markers?: { location: { _lat: number; _long: number }; type: string; name: string }[];
+  markers?: { location: { _lat: number; _long: number }; type: string; name: string }[] | any[];
   activities?: { [key: string]: number };
-  notSignedIn: () => void;
+  notSignedIn?: () => void;
   signInCheckResult: boolean,
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
   onMarkerChange: (index: string[] | null) => void;
+  In: any;
+  searchValue: any;
 }
 
 /**
@@ -132,7 +134,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
             setPlace(marker);
             setIsOpen(true);
           } else {
-            notSignedIn();
+            notSignedIn!();
           }
         });
       });
