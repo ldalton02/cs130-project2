@@ -9,8 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "docs:generate": "typedoc --out docs ./src",
-    "docs:serve": "typedoc --out docs ./src --serve"
+    "docs:generate": "typedoc --out docs ./assets/**/*.tsx ./components/**/*.tsx ./pages/**/*.tsx",
+    "docs:serve": "typedoc --out docs ./assets/**/*.tsx ./components/**/*.tsx ./pages/**/*.tsx --serve"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
