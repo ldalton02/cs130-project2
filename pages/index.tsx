@@ -85,11 +85,6 @@ export default function Home() {
     idField: "id",
   });
 
-  console.log("placeQueryStatus")
-  console.log(placeQueryStatus)
-  console.log("places")
-  console.log(places)
-
   // Fetch chats data from Firestore
   const chatsCollection = collection(firestore, "chats");
   const chatsQuery = query(chatsCollection);
