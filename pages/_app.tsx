@@ -14,6 +14,9 @@ import { Work_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { getAuth } from "firebase/auth";
 import { Speech } from "lucide-react";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
 
 const inter = Work_Sans({ subsets: ["latin"] });
 

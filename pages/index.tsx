@@ -4,12 +4,17 @@ import {
   collection,
   orderBy,
   query,
+  where,
+  getDocs,
+  QueryDocumentSnapshot,
   Timestamp
 } from "firebase/firestore";
+
 import {
   useFirestore,
   useFirestoreCollectionData,
-  useSigninCheck
+  useSigninCheck,
+  useUser
 } from "reactfire";
 
 import { ChatroomModal } from "@/components/ChatroomModal";
@@ -20,25 +25,33 @@ interface Place {
     _long: number;
   };
 }
+import { MyScrollableChart } from '../components/activity-chart/activity-chart'
+
 import { useToast } from "@/components/ui/use-toast";
 import { Autocomplete, TextField } from "@mui/material";
 
 export default function Home() {
+
+  // Hooks
+  const { toast, dismiss } = useToast();
+  const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
+  const { data: user } = useUser();
+  // State variables
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   }>({ lat: 34.0699, lng: -118.4438 });
-
-
   const [closestMarker, setClosestMarker] = useState<string[] | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
+  const [userUID, setUserUID] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [userAnimal, setUserAnimal] = useState("");
   const [searchValue, setSearchValue] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null); // Add state variable for selected location
-  const { toast, dismiss } = useToast();
   const dismissToast = () => {
     dismiss(); // Dismiss all toasts
   };
@@ -52,7 +65,7 @@ export default function Home() {
       dismissToast();
     }, 3000)
   };
-  
+
   // START: reactfire Hooks to subscribe to places database:
   const firestore = useFirestore();
   const placesCollection = collection(firestore, "places");
@@ -61,7 +74,6 @@ export default function Home() {
   const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(placesQuery, {
     idField: "id",
   });
-  const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
 
   // Fetch chats data from Firestore
   const chatsCollection = collection(firestore, "chats");
@@ -76,13 +88,13 @@ export default function Home() {
   // Calculate the timestamp for an hour ago
   const now = Timestamp.now().seconds
   const oneHourAgo = now - 3600;
-  
-  if(places) {
+
+  if (places) {
     const placeIdToName: { [key: string]: string } = {};
     places.forEach((place) => {
       placeIdToName[place.id] = place.name;
     });
-    
+
     // Iterate over chats and update the activities dictionary
     chats.forEach((chat) => {
       const { place, time } = chat;
@@ -93,33 +105,64 @@ export default function Home() {
     });
   }
 
-    // Manually get user location
-    useEffect(() => {
-      // Check if geolocation is supported by the browser
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setUserLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          },
-          (error) => {
-            console.error("Error getting user location:", error);
-          }
-        );
-      } else {
-        console.error("Geolocation is not supported by this browser.");
-      }
-    }, []);
+  // Manually get user location
+  useEffect(() => {
+    // Check if geolocation is supported by the browser
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
 
-  if (placeQueryStatus === 'loading' || signInStatus === 'loading') {
-    return <p>loading</p>
+  // Fetch userdata
+  const getUserAnimal = async () => {
+
+    const userDataCollection = collection(firestore, "userdata");
+
+    const messageQuery = query(
+      userDataCollection,
+      where("uid", "==", user?.uid)
+    );
+
+    const querySnapshot = await getDocs(messageQuery);
+
+    // Process query result
+    const userDataDocs = querySnapshot.docs.map((doc: QueryDocumentSnapshot) =>
+      doc.data()
+    );
+
+    let result = userDataDocs[0]; // Assuming there's only one document matching the query
+
+    setUserAnimal(result.animal);
+    setLoading(false)
+  };
+
+  useEffect(() => {
+    if (user) {
+      setUserUID(user?.uid);
+      getUserAnimal()
+    }
+  }, [user]);
+
+  // TODO(ldalton02): create better loading status...
+  if (placeQueryStatus == "loading" || signInStatus == "loading" || loading) {
+    return <p>Loading...</p>;
   }
-  
+
   return (
     <div className="h-full">
-      <Autocomplete 
+      <Autocomplete
         selectOnFocus
         clearOnBlur
         autoComplete
@@ -129,7 +172,7 @@ export default function Home() {
             {...params}
             label="Search for a place"
             variant="outlined"
-            style={{ width: "30%", left: "35%"}}
+            style={{ width: "30%", left: "35%" }}
           />
         )}
         onKeyDown={(event) => {
@@ -142,7 +185,7 @@ export default function Home() {
         onSelect={(event) => {
           const selectedPlace = places.find((place) => place.name === event.target.value);
           if (selectedPlace && searchValue !== selectedPlace.name) {
-            setSelectedLocation({lat: selectedPlace.location._lat, lng: selectedPlace.location._long});
+            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
             setSearchValue(selectedPlace.name);
           }
         }}
@@ -158,7 +201,7 @@ export default function Home() {
             style={{ marginBottom: "20px" }}
             markers={places} // Pass places as markers
             activities={activities}
-            notSignedIn={showToast}
+            In={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
             onMarkerChange={setClosestMarker}
             searchValue={searchValue}
@@ -166,7 +209,18 @@ export default function Home() {
           />
         </div>
       </section>
-      <ChatroomModal isOpen={isOpen} setIsOpen={setIsOpen} setPlace={setPlace} place={place} closestMarkerIndex={closestMarker} />
+      <ChatroomModal
+        userUID={userUID}
+        userAnimal={userAnimal}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        setPlace={setPlace}
+        place={place}
+        closestMarkerIndex={closestMarker}
+      />
+      <div className="h-h-full flex flex-col justify-center items-center pb-8 pt-6 md:pb-12 md:pt-10">
+        <MyScrollableChart />
+      </div>
     </div>
   );
 }
