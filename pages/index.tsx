@@ -97,6 +97,8 @@ export default function Home() {
   const now = Timestamp.now().seconds
   const oneHourAgo = now - 3600;
 
+  let places_mapped: { location: { _lat: number; _long: number }; type: string; name: string }[] = [];
+
   if (places) {
     const placeIdToName: { [key: string]: string } = {};
     places.forEach((place) => {
@@ -111,6 +113,11 @@ export default function Home() {
         activities[placeName] = (activities[placeName] || 0) + 1;
       }
     });
+    places_mapped = places.map(doc => ({
+      location: { _lat: doc._lat, _long: doc._long },
+      type: doc.type,
+      name: doc.name
+    }));
   }
 
   // Manually get user location
@@ -185,17 +192,17 @@ export default function Home() {
         )}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
-            if (event.target.value === "") {
+//            if (event.target.value === "") {
               setSelectedLocation(null);
-            }
+//            }
           }
         }}
         onSelect={(event) => {
-          const selectedPlace = places.find((place) => place.name === event.target.value);
-          if (selectedPlace && searchValue !== selectedPlace.name) {
-            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
-            setSearchValue(selectedPlace.name);
-          }
+//          const selectedPlace = places.find((place) => place.name === event.target.value);
+//          if (selectedPlace && searchValue !== selectedPlace.name) {
+//            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
+//            setSearchValue(selectedPlace.name);
+//          }
         }}
       />
 
@@ -207,7 +214,7 @@ export default function Home() {
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
             center={userLocation}
             style={{ marginBottom: "20px" }}
-            markers={places} // Pass places as markers
+            markers={places_mapped} // Pass places as markers
             activities={activities}
             In={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
