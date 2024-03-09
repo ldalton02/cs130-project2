@@ -26,17 +26,16 @@ interface Place {
   };
 }
 import { MyScrollableChart } from '../components/activity-chart/activity-chart'
-
 import { useToast } from "@/components/ui/use-toast";
 import { Autocomplete, TextField } from "@mui/material";
 
 export default function Home() {
-
   // Hooks
   const { toast, dismiss } = useToast();
   const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
   const { data: user } = useUser();
   // State variables
+
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
