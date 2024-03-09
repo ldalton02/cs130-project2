@@ -7,13 +7,14 @@ import {
   where,
   getDocs,
   QueryDocumentSnapshot,
+  Timestamp
 } from "firebase/firestore";
 
 import {
   useFirestore,
   useFirestoreCollectionData,
   useSigninCheck,
-  useUser,
+  useUser
 } from "reactfire";
 
 import { ChatroomModal } from "@/components/ChatroomModal";
@@ -25,16 +26,16 @@ interface Place {
   };
 }
 import { MyScrollableChart } from '../components/activity-chart/activity-chart'
-
 import { useToast } from "@/components/ui/use-toast";
+import { Autocomplete, TextField } from "@mui/material";
 
 export default function Home() {
   // Hooks
   const { toast, dismiss } = useToast();
   const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
   const { data: user } = useUser();
-
   // State variables
+
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
@@ -43,9 +44,13 @@ export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState(null);
   const [userUID, setUserUID] = useState("");
-  const [userAnimal, setUserAnimal] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const [userAnimal, setUserAnimal] = useState("");
+  const [searchValue, setSearchValue] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null); // Add state variable for selected location
   const dismissToast = () => {
     dismiss(); // Dismiss all toasts
   };
@@ -57,20 +62,47 @@ export default function Home() {
 
     setTimeout(() => {
       dismissToast();
-    }, 3000);
+    }, 3000)
   };
 
-  // Reactfire Hooks
+  // START: reactfire Hooks to subscribe to places database:
   const firestore = useFirestore();
   const placesCollection = collection(firestore, "places");
   const placesQuery = query(placesCollection, orderBy("name", "asc"));
   // Fetch places data from Firestore
-  const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(
-    placesQuery,
-    {
-      idField: "id",
-    }
-  );
+  const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(placesQuery, {
+    idField: "id",
+  });
+
+  // Fetch chats data from Firestore
+  const chatsCollection = collection(firestore, "chats");
+  const chatsQuery = query(chatsCollection);
+  const { status: chatQueryStatus, data: chats } = useFirestoreCollectionData(chatsQuery, {
+    idField: "id",
+  });
+  // END
+
+  const activities: { [key: string]: number } = {};
+
+  // Calculate the timestamp for an hour ago
+  const now = Timestamp.now().seconds
+  const oneHourAgo = now - 3600;
+
+  if (places) {
+    const placeIdToName: { [key: string]: string } = {};
+    places.forEach((place) => {
+      placeIdToName[place.id] = place.name;
+    });
+
+    // Iterate over chats and update the activities dictionary
+    chats.forEach((chat) => {
+      const { place, time } = chat;
+      if (time >= oneHourAgo) {
+        const placeName = placeIdToName[place];
+        activities[placeName] = (activities[placeName] || 0) + 1;
+      }
+    });
+  }
 
   // Manually get user location
   useEffect(() => {
@@ -129,6 +161,35 @@ export default function Home() {
 
   return (
     <div className="h-full">
+      <Autocomplete
+        selectOnFocus
+        clearOnBlur
+        autoComplete
+        options={places.map((place) => place.name)}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Search for a place"
+            variant="outlined"
+            style={{ width: "30%", left: "35%" }}
+          />
+        )}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            if (event.target.value === "") {
+              setSelectedLocation(null);
+            }
+          }
+        }}
+        onSelect={(event) => {
+          const selectedPlace = places.find((place) => place.name === event.target.value);
+          if (selectedPlace && searchValue !== selectedPlace.name) {
+            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
+            setSearchValue(selectedPlace.name);
+          }
+        }}
+      />
+
       <section className="h-full flex flex-col justify-center items-center pb-8 pt-6 md:pb-12 md:pt-10">
         <div className="h-full container flex flex-col items-center gap-8 text-center sm:px-0">
           <GoogleMap
@@ -137,13 +198,13 @@ export default function Home() {
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
             center={userLocation}
             style={{ marginBottom: "20px" }}
-            markers={
-              // TODO(ldalton02): marker function supposed to accept place type, works with wrong code: FIX
-              places
-            }
+            markers={places} // Pass places as markers
+            activities={activities}
             In={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
             onMarkerChange={setClosestMarker}
+            searchValue={searchValue}
+            selectedLocation={selectedLocation} // Pass selectedLocation as prop
           />
         </div>
       </section>

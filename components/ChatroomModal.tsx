@@ -13,9 +13,6 @@ import {
   collection,
   orderBy,
   query,
-  documentId,
-  getDocs,
-  QueryDocumentSnapshot,
   doc,
   where,
   addDoc,
@@ -47,7 +44,7 @@ const getHumanReadableTime = (database_date: any) => {
     currentDate.getDate() === messageDate.getDate()
   ) {
     // If the message date is today, display "Today"
-    let hour_minute = new Date(database_date).toLocaleString(undefined, {
+    let hour_minute = new Date(database_date * 1000).toLocaleString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
     })
@@ -198,7 +195,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           )}
         </div>
         {/* (stovsky) set to true for testing purposes to test all chats*/}
-        {false || closestMarkerIndex?.includes(place.name) ? (
+        {true || closestMarkerIndex?.includes(place.name) ? (
           <div className="flex flex-row items-end gap-2 text-center h-min">
             {/*TODO(ldalton02): add list here */}
             <Input

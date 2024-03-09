@@ -50,11 +50,6 @@ export const NavBar: FC = () => {
             </Link>
           ) : (
             <>
-              <Link href="/dashboard">
-                <Button variant="link" size="sm">
-                  Dashboard
-                </Button>
-              </Link>
               <UserNav />
             </>
           )}

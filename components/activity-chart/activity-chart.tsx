@@ -94,7 +94,7 @@ export const MyScrollableChart: FC = () => {
                     messages.forEach(msg => {
                         // Create Date object of message time
                         const msgDate: Date = new Date()
-                        msgDate.setTime(msg.time)
+                        msgDate.setTime(msg.time * 1000)
 
                         // check if Date Object is between the times we are iterating through
                         if (msgDate > start && msgDate < end) {
@@ -135,13 +135,16 @@ export const MyScrollableChart: FC = () => {
                 tempdatablock = tempdatablock.reverse() // reverse 
                 setData(tempdatablock); // store processed state
 
-
                 // Generate Lines object
                 let templines: any[] = []
                 predataMap.forEach(element => {
                     templines.push(element.data_id)
                 });
                 setLines(templines) // store statefully
+                console.log("lines")
+                console.log(lines)
+                console.log("data")
+                console.log(data)
 
             } catch (error) {
                 console.error('Error fetching data from Firebase:', error);
