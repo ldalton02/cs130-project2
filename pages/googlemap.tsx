@@ -119,14 +119,13 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         } else {
           color = "red";
         }
+
         const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
           animation: google.maps.Animation.DROP,
-          // TODO: Change the icon color based on activity levels
           // Roccos not showing up for some reason (very fitting)
-          // icon: images[`${marker.type}_${color}`], -> 
-          icon: images[`${marker.type}_${color}` as keyof typeof images],
+          icon: (images as any)[`${marker.type}_${color}`]
         });
 
         iconMarker.addListener("click", () => {
@@ -139,6 +138,8 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         });
       });
     }
+
+
 
     return () => {
       // Clean up the script tag when the component unmounts
