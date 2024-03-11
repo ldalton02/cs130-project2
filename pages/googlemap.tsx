@@ -1,3 +1,6 @@
+/**
+ * Create and render google map component on homepage of site.
+ */
 import { useEffect, useRef } from 'react';
 import { images } from '../assets/index';
 
@@ -13,15 +16,24 @@ interface GoogleMapProps {
   disableDefaultUI?: boolean;
   maxZoom?: number;
   minZoom?: number;
-  markers?: { location: { _lat: number; _long: number }; type: string; name: string }[];
+  markers?: { location: { _lat: number; _long: number }; type: string; name: string }[] | any[];
   activities?: { [key: string]: number };
-  notSignedIn: () => void;
+  notSignedIn?: () => void;
   signInCheckResult: boolean,
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
   onMarkerChange: (index: string[] | null) => void;
+  In: any;
+  searchValue: any;
 }
 
+/**
+ * Use Google Maps api to create map image and geolocate user.
+ * Use firebase location data to create markers at specified location.
+ * Assign location color based on activity level.
+ * @param param0 
+ * @returns google map component with places
+ */
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
   center,
@@ -122,7 +134,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
             setPlace(marker);
             setIsOpen(true);
           } else {
-            notSignedIn();
+            notSignedIn!();
           }
         });
       });

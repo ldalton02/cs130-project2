@@ -1,3 +1,6 @@
+/**
+ * Create guidelines for home page.
+ */
 import GoogleMap from "./googlemap";
 import { useEffect, useState } from "react";
 import {
@@ -29,6 +32,12 @@ import { MyScrollableChart } from '../components/activity-chart/activity-chart'
 import { useToast } from "@/components/ui/use-toast";
 import { Autocomplete, TextField } from "@mui/material";
 
+/**
+ * Collects firebase data to be rendered in the homepage.
+ * Performs user geolocation.
+ * Analyzes database data for analytics purposes.
+ * @returns homepage props, including user information and map data
+ */
 export default function Home() {
   // Hooks
   const { toast, dismiss } = useToast();
@@ -51,6 +60,7 @@ export default function Home() {
     lat: number;
     lng: number;
   } | null>(null); // Add state variable for selected location
+
   const dismissToast = () => {
     dismiss(); // Dismiss all toasts
   };
@@ -69,6 +79,7 @@ export default function Home() {
   const firestore = useFirestore();
   const placesCollection = collection(firestore, "places");
   const placesQuery = query(placesCollection, orderBy("name", "asc"));
+
   // Fetch places data from Firestore
   const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(placesQuery, {
     idField: "id",
@@ -87,22 +98,6 @@ export default function Home() {
   // Calculate the timestamp for an hour ago
   const now = Timestamp.now().seconds
   const oneHourAgo = now - 3600;
-
-  if (places) {
-    const placeIdToName: { [key: string]: string } = {};
-    places.forEach((place) => {
-      placeIdToName[place.id] = place.name;
-    });
-
-    // Iterate over chats and update the activities dictionary
-    chats.forEach((chat) => {
-      const { place, time } = chat;
-      if (time >= oneHourAgo) {
-        const placeName = placeIdToName[place];
-        activities[placeName] = (activities[placeName] || 0) + 1;
-      }
-    });
-  }
 
   // Manually get user location
   useEffect(() => {
@@ -176,17 +171,17 @@ export default function Home() {
         )}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
-            if (event.target.value === "") {
-              setSelectedLocation(null);
-            }
+            //            if (event.target.value === "") {
+            setSelectedLocation(null);
+            //            }
           }
         }}
         onSelect={(event) => {
-          const selectedPlace = places.find((place) => place.name === event.target.value);
-          if (selectedPlace && searchValue !== selectedPlace.name) {
-            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
-            setSearchValue(selectedPlace.name);
-          }
+          //          const selectedPlace = places.find((place) => place.name === event.target.value);
+          //          if (selectedPlace && searchValue !== selectedPlace.name) {
+          //            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
+          //            setSearchValue(selectedPlace.name);
+          //          }
         }}
       />
 
@@ -198,13 +193,13 @@ export default function Home() {
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
             center={userLocation}
             style={{ marginBottom: "20px" }}
-            markers={places} // Pass places as markers
+            markers={places}
             activities={activities}
             In={showToast}
             signInCheckResult={signInCheckResult.signedIn === true}
             onMarkerChange={setClosestMarker}
             searchValue={searchValue}
-            selectedLocation={selectedLocation} // Pass selectedLocation as prop
+            selectedLocation={selectedLocation!} // Pass selectedLocation as prop
           />
         </div>
       </section>

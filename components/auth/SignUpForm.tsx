@@ -1,3 +1,6 @@
+/**
+ * Allows a user to enter an email and password to create a new account.
+ */
 import * as React from "react";
 import {
   Form,
@@ -29,6 +32,11 @@ interface SignUpFormProps {
   onSignUp?: (uid: any) => void;
 }
 
+/**
+ * Takes user email and password to create a new user account.
+ * @param param0 
+ * @returns sign up interface allowing user to sign up with credentials
+ */
 export const SignUpForm: FC<SignUpFormProps> = ({ onShowLogin, onSignUp }) => {
   const [isLoading, setIsLoading] = useState(false);
 

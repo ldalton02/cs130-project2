@@ -1,3 +1,6 @@
+/**
+ * Default template dashboard code.
+ */
 import { FC } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";

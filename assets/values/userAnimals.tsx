@@ -1,3 +1,8 @@
+/**
+ * Provides animal representations for anonymous users.
+ * Defines animal icons and fetches at random for each new account.
+ */
+
 export const animals: string[] = [
     "Alligator",
     "Ant",
@@ -160,11 +165,20 @@ export const animalMap: Record<string, string> = {
     "Zebra": "🦓",
 };
 
+/**
+ * Randomly selects icon
+ * @returns random animal
+ */
 export function getRandomAnimal(): string {
     const randomIndex = Math.floor(Math.random() * animals.length);
     return animals[randomIndex];
 }
 
+/**
+ * Returns icon for animal
+ * @param animal 
+ * @returns corresponding icon
+ */
 export function getAnimalEmoji(animal: string): string {
     return animalMap[animal] || "";
 }

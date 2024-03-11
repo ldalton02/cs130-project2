@@ -1,3 +1,6 @@
+/**
+ * Create original user homepage.
+ */
 import { DemoDashboard } from "@/components/demo-dashboard/demo-dashboard";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/router";

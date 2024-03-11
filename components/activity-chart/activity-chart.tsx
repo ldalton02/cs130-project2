@@ -1,3 +1,6 @@
+/**
+ * Creates an activity chart for a location that shows trends in activity over time.
+ */
 import React, { FC, useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useFirestore, useObservable } from 'reactfire';
@@ -22,7 +25,10 @@ interface ChatObject {
 // data to pass to
 type DataBlock = any[]
 
-
+/**
+ * Creates a scrollable chart that takes in time and place data and analyzes to create an activity graph.
+ * @returns activity graph component with line object
+ */
 export const MyScrollableChart: FC = () => {
     const [data, setData] = useState<DataBlock>(); // data block
     const [lines, setLines] = useState<DataBlock>();

@@ -1,3 +1,6 @@
+/**
+ * Allows a user to change their password through email if they forget.
+ */
 import { FC, useState } from "react";
 import {
   Dialog,
@@ -18,6 +21,11 @@ interface ModalChangePasswordProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
+/**
+ * Sends an email to user's address prompting to reset password
+ * @param param0 
+ * @returns dialog box confirming success
+ */
 export const ModalForgotPassword: FC<ModalChangePasswordProps> = ({
   isOpen,
   setIsOpen,

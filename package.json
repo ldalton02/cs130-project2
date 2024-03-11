@@ -8,7 +8,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docs:generate": "typedoc --out docs ./assets/**/*.tsx ./components/**/*.tsx ./pages/**/*.tsx",
+    "docs:serve": "typedoc --out docs ./assets/**/*.tsx ./components/**/*.tsx ./pages/**/*.tsx --serve"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -52,6 +54,7 @@
     "autoprefixer": "latest",
     "postcss": "latest",
     "tailwindcss": "latest",
+    "typedoc": "^0.25.11",
     "typescript": "latest"
   }
 }
