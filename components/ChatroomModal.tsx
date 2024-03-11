@@ -132,28 +132,28 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           <div>
             <button onClick={() => {
               const msgRef = doc(firestore, "chats", msg.id);
-              const userId = currentUser.data.uid;
+              const userId = currentUser.data!.uid;
 
               const q = query(collection(firestore, "chats"), where("upVoters", "array-contains", userId));
-              if (msg.upVoters == null || !q){
+              if (msg.upVoters == null || !q) {
                 updateDoc(msgRef, {
-                  upVote: (msg.upVote)? msg.upVote + 1 : 1,
-                  upVoters: (msg.upVoters == null)? [userId] : msg.upVoters.add(userId),
+                  upVote: (msg.upVote) ? msg.upVote + 1 : 1,
+                  upVoters: (msg.upVoters == null) ? [userId] : msg.upVoters.add(userId),
                 });
               }
-            }} className="px-3"><FontAwesomeIcon icon={faCaretUp}/>{msg.upVote}</button>
+            }} className="px-3"><FontAwesomeIcon icon={faCaretUp} />{msg.upVote}</button>
             <button onClick={() => {
               const msgRef = doc(firestore, "chats", msg.id);
-              const userId = currentUser.data.uid;
+              const userId = currentUser.data!.uid;
 
               const q = query(collection(firestore, "chats"), where("downVoters", "array-contains", userId));
-              if (msg.downVoters == null || !q){
+              if (msg.downVoters == null || !q) {
                 updateDoc(msgRef, {
-                  downVote: (msg.downVote)? msg.downVote - 1 : -1,
-                  downVoters: (msg.downVoters == null)? [userId] : msg.downVoters.add(userId),
+                  downVote: (msg.downVote) ? msg.downVote - 1 : -1,
+                  downVoters: (msg.downVoters == null) ? [userId] : msg.downVoters.add(userId),
                 });
               }
-            }}><FontAwesomeIcon icon={faCaretDown}/>{msg.downVote}</button>
+            }}><FontAwesomeIcon icon={faCaretDown} />{msg.downVote}</button>
           </div> {/* Up and Down Vote */}
         </div>
       </div>
@@ -183,7 +183,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           )}
         </div>
         {/* (stovsky) set to true for testing purposes to test all chats*/}
-        {false || closestMarkerIndex?.includes(place.name) ? (
+        {true || closestMarkerIndex?.includes(place.name) ? (
           <div className="flex flex-row items-end gap-2 text-center h-min">
             {/*TODO(ldalton02): add list here */}
             <Input
@@ -202,7 +202,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                     place: place.id,
                     message,
                     time: Timestamp.now().seconds,
-                    uid: currentUser.data.uid,
+                    uid: currentUser.data!.uid,
                     upVoters: [],
                     downVoters: [],
                   });

@@ -15,7 +15,7 @@ interface GoogleMapProps {
   disableDefaultUI?: boolean;
   maxZoom?: number;
   minZoom?: number;
-  markers?: { location: { _lat: number; _long: number }; type: string; name: string}[];
+  markers?: { location: { _lat: number; _long: number }; type: string; name: string }[] | any[];
   activities?: { [key: string]: number };
   notSignedIn: () => void;
   signInCheckResult: boolean,
@@ -54,7 +54,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
     function initMap() {
       if (!mapRef.current || !markers || markers.length === 0) return;
-    
+
       const map = new google.maps.Map(mapRef.current, {
         center,
         zoom,
@@ -63,7 +63,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         maxZoom,
         minZoom,
       });
-    
+
       // Add marker for the user's location
       const userMarker = new google.maps.Marker({
         position: center,
@@ -71,7 +71,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         animation: google.maps.Animation.DROP,
         icon: images["user_location"], // Provide the appropriate image for the user's location marker
       });
-    
+
       // Calculate distances from user location to each marker
       const distances = markers.map((marker) => {
         const markerLocation = new google.maps.LatLng(marker.location._lat, marker.location._long);
@@ -80,21 +80,21 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           distance: google.maps.geometry.spherical.computeDistanceBetween(center, markerLocation)
         };
       });
-    
+
       // Find markers within {threshold} meters and store their indices
-      const closestMarkersIndices : string[] = [];
+      const closestMarkersIndices: string[] = [];
       const thresholdDistance = 200; // Adjust the threshold distance as needed
       distances.forEach((item) => {
         if (item.distance < thresholdDistance) {
           closestMarkersIndices.push(item.index);
         }
       });
-    
+
       // Invoke the callback function with the closestMarkersIndices
       onMarkerChange(closestMarkersIndices.length > 0 ? closestMarkersIndices : null);
-    
+
       // Go through and make activity levels ig
-      if(!activities) return;
+      if (!activities) return;
 
       // Add markers to the map
       markers.forEach((marker, index) => {
@@ -102,21 +102,21 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         let color;
         // Define color based on activity level
         if (activityLevel < 5) {
-         color = "green";
+          color = "green";
         } else if (activityLevel < 10) {
           color = "orange";
         } else {
           color = "red";
         }
+
         const iconMarker = new google.maps.Marker({
           position: { lat: marker.location._lat, lng: marker.location._long },
           map,
           animation: google.maps.Animation.DROP,
-          // TODO: Change the icon color based on activity levels
           // Roccos not showing up for some reason (very fitting)
-          icon: images[`${marker.type}_${color}`]
+          icon: (images as any)[`${marker.type}_${color}`]
         });
-    
+
         iconMarker.addListener("click", () => {
           if (signInCheckResult) {
             setPlace(marker);
@@ -127,8 +127,8 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         });
       });
     }
-    
-    
+
+
 
     return () => {
       // Clean up the script tag when the component unmounts
