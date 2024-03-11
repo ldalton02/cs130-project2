@@ -1,3 +1,6 @@
+/**
+ * Connect database and create app basic framework.
+ */
 import { NavBar } from "@/components/NavBar";
 import "@/styles/globals.css";
 import { FirebaseOptions } from "firebase/app";

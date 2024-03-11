@@ -1,3 +1,6 @@
+/**
+ * Allows a user to enter an email and password to create a new account.
+ */
 import * as React from "react";
 import {
   Form,
@@ -26,9 +29,14 @@ const formSchema = z.object({
 
 interface SignUpFormProps {
   onShowLogin: () => void;
-  onSignUp?: () => void;
+  onSignUp?: (uid: any) => void;
 }
 
+/**
+ * Takes user email and password to create a new user account.
+ * @param param0 
+ * @returns sign up interface allowing user to sign up with credentials
+ */
 export const SignUpForm: FC<SignUpFormProps> = ({ onShowLogin, onSignUp }) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,7 +57,8 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onShowLogin, onSignUp }) => {
       if (user?.user.uid && user.user.email) {
         // create user in firestore here if you want
         toast({ title: "Account created!" });
-        onSignUp?.();
+        // Perform onSignUp function, creating custom user data
+        onSignUp?.(user.user.uid);
       }
     } catch (err: any) {
       if ("code" in err && err.code.includes("already")) {

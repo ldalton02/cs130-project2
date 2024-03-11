@@ -1,3 +1,7 @@
+/**
+ * Imports and creates aliases for images used in app
+ */
+
 import markerDefault from 'assets/images/marker-default.svg'
 import markerBarGreen from 'assets/images/marker-bar-green.svg'
 import markerBarOrange from 'assets/images/marker-bar-orange.svg'

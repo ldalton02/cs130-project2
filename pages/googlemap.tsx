@@ -1,12 +1,13 @@
+/**
+ * Create and render google map component on homepage of site.
+ */
 import { useEffect, useRef } from 'react';
 import { images } from '../assets/index';
-//import fetchNumberOfChats  from './index';
-import { Button } from '@/components/ui/button';
-import { InfoWindow } from "@react-google-maps/api";
 
 interface GoogleMapProps {
   apiKey: string;
   center: { lat: number; lng: number };
+  selectedLocation: { lat: number; lng: number };
   zoom?: number;
   className?: string;
   style?: React.CSSProperties;
@@ -17,17 +18,27 @@ interface GoogleMapProps {
   minZoom?: number;
   markers?: { location: { _lat: number; _long: number }; type: string; name: string }[] | any[];
   activities?: { [key: string]: number };
-  notSignedIn: () => void;
+  notSignedIn?: () => void;
   signInCheckResult: boolean,
   setIsOpen: (isOpen: boolean) => void;
   setPlace: (place: any) => void;
   onMarkerChange: (index: string[] | null) => void;
+  In: any;
+  searchValue: any;
 }
 
+/**
+ * Use Google Maps api to create map image and geolocate user.
+ * Use firebase location data to create markers at specified location.
+ * Assign location color based on activity level.
+ * @param param0 
+ * @returns google map component with places
+ */
 const GoogleMap: React.FC<GoogleMapProps> = ({
   apiKey,
   center,
-  zoom = 15,
+  selectedLocation,
+  zoom = selectedLocation ? 20 : 15,
   className,
   style,
   streetViewControl = false,
@@ -56,7 +67,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       if (!mapRef.current || !markers || markers.length === 0) return;
 
       const map = new google.maps.Map(mapRef.current, {
-        center,
+        center: selectedLocation || center, // Use selectedLocation if available, otherwise use center
         zoom,
         streetViewControl,
         clickableIcons,
@@ -114,7 +125,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           map,
           animation: google.maps.Animation.DROP,
           // Roccos not showing up for some reason (very fitting)
-          icon: (images as any)[`${marker.type}_${color}`]
+          icon: images[`${marker.type}_${color}`]
         });
 
         iconMarker.addListener("click", () => {
@@ -122,7 +133,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
             setPlace(marker);
             setIsOpen(true);
           } else {
-            notSignedIn();
+            notSignedIn!();
           }
         });
       });
@@ -134,9 +145,11 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       // Clean up the script tag when the component unmounts
       document.head.removeChild(script);
     };
-  }, [apiKey, center, zoom, markers]);
+  }, [apiKey, center, zoom, markers, selectedLocation]); // Add selectedLocation to dependency array
+
 
   return (
+
     <div
       ref={mapRef}
       className={className}
