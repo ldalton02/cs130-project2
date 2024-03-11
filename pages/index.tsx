@@ -10,14 +10,14 @@ import {
   where,
   getDocs,
   QueryDocumentSnapshot,
-  Timestamp
+  Timestamp,
 } from "firebase/firestore";
 
 import {
   useFirestore,
   useFirestoreCollectionData,
   useSigninCheck,
-  useUser
+  useUser,
 } from "reactfire";
 
 import { ChatroomModal } from "@/components/ChatroomModal";
@@ -28,9 +28,10 @@ interface Place {
     _long: number;
   };
 }
-import { MyScrollableChart } from '../components/activity-chart/activity-chart'
+import { MyScrollableChart } from "../components/activity-chart/activity-chart";
 import { useToast } from "@/components/ui/use-toast";
 import { Autocomplete, TextField } from "@mui/material";
+import { useRouter } from "next/router";
 
 /**
  * Collects firebase data to be rendered in the homepage.
@@ -43,6 +44,7 @@ export default function Home() {
   const { toast, dismiss } = useToast();
   const { status: signInStatus, data: signInCheckResult } = useSigninCheck();
   const { data: user } = useUser();
+  const router = useRouter();
   // State variables
 
   const [userLocation, setUserLocation] = useState<{
@@ -72,7 +74,7 @@ export default function Home() {
 
     setTimeout(() => {
       dismissToast();
-    }, 3000)
+    }, 3000);
   };
 
   // START: reactfire Hooks to subscribe to places database:
@@ -81,22 +83,28 @@ export default function Home() {
   const placesQuery = query(placesCollection, orderBy("name", "asc"));
 
   // Fetch places data from Firestore
-  const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(placesQuery, {
-    idField: "id",
-  });
+  const { status: placeQueryStatus, data: places } = useFirestoreCollectionData(
+    placesQuery,
+    {
+      idField: "id",
+    }
+  );
 
   // Fetch chats data from Firestore
   const chatsCollection = collection(firestore, "chats");
   const chatsQuery = query(chatsCollection);
-  const { status: chatQueryStatus, data: chats } = useFirestoreCollectionData(chatsQuery, {
-    idField: "id",
-  });
+  const { status: chatQueryStatus, data: chats } = useFirestoreCollectionData(
+    chatsQuery,
+    {
+      idField: "id",
+    }
+  );
   // END
 
   const activities: { [key: string]: number } = {};
 
   // Calculate the timestamp for an hour ago
-  const now = Timestamp.now().seconds
+  const now = Timestamp.now().seconds;
   const oneHourAgo = now - 3600;
 
   // Manually get user location
@@ -121,7 +129,6 @@ export default function Home() {
 
   // Fetch userdata
   const getUserAnimal = async () => {
-
     const userDataCollection = collection(firestore, "userdata");
 
     const messageQuery = query(
@@ -139,13 +146,15 @@ export default function Home() {
     let result = userDataDocs[0]; // Assuming there's only one document matching the query
 
     setUserAnimal(result.animal);
-    setLoading(false)
+    setLoading(false);
   };
 
   useEffect(() => {
     if (user) {
       setUserUID(user?.uid);
-      getUserAnimal()
+      getUserAnimal();
+    } else {
+      router.push("/login");
     }
   }, [user]);
 
@@ -170,17 +179,20 @@ export default function Home() {
           />
         )}
         onKeyDown={(event) => {
-          if (event.key === 'Enter') {
+          if (event.key === "Enter") {
             //            if (event.target.value === "") {
             setSelectedLocation(null);
             //            }
           }
         }}
         onSelect={(event) => {
-          const s = event.target as HTMLInputElement
+          const s = event.target as HTMLInputElement;
           const selectedPlace = places.find((place) => place.name === s.value);
           if (selectedPlace && searchValue !== selectedPlace.name) {
-            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
+            setSelectedLocation({
+              lat: selectedPlace.location._lat,
+              lng: selectedPlace.location._long,
+            });
             setSearchValue(selectedPlace.name);
           }
         }}

@@ -40,7 +40,7 @@ export default function LoginPage() {
   }, [user]);
 
   return (
-    <div className="mt-[20%]">
+    <div className="mt-[10%]">
       <section className="max-w-md mx-auto">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
           Bruin Banter
