@@ -125,7 +125,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
           map,
           animation: google.maps.Animation.DROP,
           // Roccos not showing up for some reason (very fitting)
-          icon: images[`${marker.type}_${color}`]
+          icon: (images as any)[`${marker.type}_${color}`]
         });
 
         iconMarker.addListener("click", () => {

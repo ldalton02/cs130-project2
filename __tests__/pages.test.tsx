@@ -3,7 +3,7 @@ import { render, fireEvent } from '@testing-library/react';
 import LoginPage from '@/pages/login';
 import GoogleMap from '@/pages/googlemap';
 import { useUser } from 'reactfire';
-import {expect, jest} from '@jest/globals';
+import { useRouter } from 'next/router';
 import App from 'next/app';
 
 // Mock useRouter and useUser hooks
@@ -18,16 +18,15 @@ jest.mock('reactfire', () => ({
 }));
 
 describe('LoginPage', () => {
-
-  it('renders about page', async () => {
-    const { getByText } = render(<App />);
-    await expect(getByText('How it Works')).toBeInTheDocument();
-  });
-  
   it('renders sign-in form by default', async () => {
     (useUser as jest.Mock).mockReturnValueOnce({ data: null });
     const { getByText } = render(<LoginPage />);
     await expect(getByText('Sign In')).toBeInTheDocument();
+  });
+  
+  it('renders about page', async () => {
+    const { getByText } = render(<App />);
+    await expect(getByText('How it Works')).toBeInTheDocument();
   });
 
   it('renders map', async () => {
@@ -39,6 +38,7 @@ describe('LoginPage', () => {
     };    
     const showToast = jest.fn();
     const setClosestMarker = jest.fn();
+    const searchValue = jest.fn();
     const { getByText } = render(<GoogleMap
       setPlace={setPlace}
       setIsOpen={setIsOpen}
@@ -47,6 +47,9 @@ describe('LoginPage', () => {
       notSignedIn={showToast}
       signInCheckResult={true}
       onMarkerChange={setClosestMarker}
+      In={showToast}
+      searchValue={searchValue}
+      selectedLocation={mockLocation!} // Pass selectedLocation as prop
     />);
     await expect(getByText('Map')).toBeInTheDocument();
   });
@@ -54,7 +57,7 @@ describe('LoginPage', () => {
   it('redirects to home page if user is already authenticated', () => {
     (useUser as jest.Mock).mockReturnValueOnce({ data: { uid: 'user123' } });
     const pushMock = jest.fn();
-    useRouter.mockReturnValueOnce({ push: pushMock });
+    (useRouter as jest.Mock).mockReturnValueOnce({ push: pushMock });
     render(<LoginPage />);
     expect(pushMock).toHaveBeenCalledWith('/');
   });
