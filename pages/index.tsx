@@ -107,6 +107,22 @@ export default function Home() {
   const now = Timestamp.now().seconds;
   const oneHourAgo = now - 3600;
 
+  if (places) {
+    const placeIdToName: { [key: string]: string } = {};
+    places.forEach((place) => {
+      placeIdToName[place.id] = place.name;
+    });
+
+    // Iterate over chats and update the activities dictionary
+    chats.forEach((chat) => {
+      const { place, time } = chat;
+      if (time >= oneHourAgo) {
+        const placeName = placeIdToName[place];
+        activities[placeName] = (activities[placeName] || 0) + 1;
+      }
+    });
+  }
+
   // Manually get user location
   useEffect(() => {
     // Check if geolocation is supported by the browser
