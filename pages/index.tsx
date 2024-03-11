@@ -177,11 +177,13 @@ export default function Home() {
           }
         }}
         onSelect={(event) => {
-          //          const selectedPlace = places.find((place) => place.name === event.target.value);
-          //          if (selectedPlace && searchValue !== selectedPlace.name) {
-          //            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
-          //            setSearchValue(selectedPlace.name);
-          //          }
+          console.log(event.target)
+          const s = event.target as HTMLInputElement
+          const selectedPlace = places.find((place) => place.name === s.value);
+          if (selectedPlace && searchValue !== selectedPlace.name) {
+            setSelectedLocation({ lat: selectedPlace.location._lat, lng: selectedPlace.location._long });
+            setSearchValue(selectedPlace.name);
+          }
         }}
       />
 
