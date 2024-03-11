@@ -83,7 +83,7 @@ export const MyScrollableChart: FC = () => {
                 })
 
                 const data_points = 6; // number of points on the graph
-                const time_frame = 2;  // size of period in hours
+                const time_frame = 6;  // size of period in hours
                 const loop_length = data_points * time_frame;
 
 
@@ -147,10 +147,6 @@ export const MyScrollableChart: FC = () => {
                     templines.push(element.data_id)
                 });
                 setLines(templines) // store statefully
-                console.log("lines")
-                console.log(lines)
-                console.log("data")
-                console.log(data)
 
             } catch (error) {
                 console.error('Error fetching data from Firebase:', error);
