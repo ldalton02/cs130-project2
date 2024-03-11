@@ -49,7 +49,7 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle>{isShowingSignUp ? "Sign Up" : "Sign In"}</CardTitle>
             <CardDescription>
-              Give them a reason to {isShowingSignUp ? "sign up" : "sign in"}.
+              {isShowingSignUp ? "join the fun!" : ""}
             </CardDescription>
           </CardHeader>
           <CardContent>
