@@ -177,7 +177,6 @@ export default function Home() {
           }
         }}
         onSelect={(event) => {
-          console.log(event.target)
           const s = event.target as HTMLInputElement
           const selectedPlace = places.find((place) => place.name === s.value);
           if (selectedPlace && searchValue !== selectedPlace.name) {
