@@ -198,7 +198,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                 <div className="py-[15px] px-5">{scrollMessages()}</div>
               </ScrollArea.Viewport>
               <ScrollArea.Scrollbar
-                className="flex select-none touch-none p-0.5 bg-blackA3 transition-colors duration-[160ms] ease-out hover:bg-blackA5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
+                className="flex select-none touch-none p-0.5 bg-blackA3 transition-colors duration-&lsqb;160ms&rsqb; ease-out hover:bg-blackA5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
                 orientation="vertical"
               >
                 <ScrollArea.Thumb className="flex-1 bg-mauve10 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
