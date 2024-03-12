@@ -156,22 +156,23 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
               const userId = currentUser.data!.uid;
 
               const q = query(collection(firestore, "chats"), where("upVoters", "array-contains", userId));
-              if (msg.upVoters == null || !q) {
+              if (msg.upVoters == undefined || msg.upVoters.length === 0 || !q) {
                 updateDoc(msgRef, {
                   upVote: (msg.upVote) ? msg.upVote + 1 : 1,
-                  upVoters: (msg.upVoters == null) ? [userId] : msg.upVoters.add(userId),
+                  upVoters: (msg.upVoters == null) ? [userId] : msg.upVoters.push(userId),
                 });
               }
             }} className="px-3"><FontAwesomeIcon icon={faCaretUp} />{msg.upVote}</button>
+            
             <button onClick={() => {
               const msgRef = doc(firestore, "chats", msg.id);
               const userId = currentUser.data!.uid;
 
               const q = query(collection(firestore, "chats"), where("downVoters", "array-contains", userId));
-              if (msg.downVoters == null || !q) {
+              if (msg.downVoters == undefined || msg.downVoters.length === 0 || !q) {
                 updateDoc(msgRef, {
                   downVote: (msg.downVote) ? msg.downVote - 1 : -1,
-                  downVoters: (msg.downVoters == null) ? [userId] : msg.downVoters.add(userId),
+                  downVoters: (msg.downVoters == null) ? [userId] : msg.downVoters.push(userId),
                 });
               }
             }}><FontAwesomeIcon icon={faCaretDown} />{msg.downVote}</button>
