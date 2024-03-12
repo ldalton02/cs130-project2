@@ -208,7 +208,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
           )}
         </div>
         {/* (stovsky) set to true for testing purposes to test all chats*/}
-        {true || closestMarkerIndex?.includes(place.name) ? (
+        {false || closestMarkerIndex?.includes(place.name) ? (
           <div className="flex flex-row items-end gap-2 text-center h-min">
             {/*TODO(ldalton02): add list here */}
             <Input
