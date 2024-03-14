@@ -40,7 +40,7 @@ interface ChatroomModalProps {
 
 /**
  * Takes  chat dates from the chatroom history and adds a timestamp.
- * @param database_date 
+ * @param database_date
  * @returns a human readable time
  */
 const getHumanReadableTime = (database_date: any) => {
@@ -55,8 +55,8 @@ const getHumanReadableTime = (database_date: any) => {
     let hour_minute = new Date(database_date * 1000).toLocaleString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
-    })
-    return String(hour_minute) + ' Today';
+    });
+    return String(hour_minute) + " Today";
   } else {
     // If the message date is older, display the full date
     const humanReadableTime = messageDate.toLocaleString(undefined, {
@@ -73,7 +73,7 @@ const getHumanReadableTime = (database_date: any) => {
 
 /**
  * Takes in chat data affiliated with a certain place and displays it
- * @param param0 
+ * @param param0
  * @returns a chatroom pop up display with recent chat data showing
  */
 export const ChatroomModal: FC<ChatroomModalProps> = ({
@@ -83,7 +83,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
   setPlace,
   closestMarkerIndex,
   userUID,
-  userAnimal
+  userAnimal,
 }) => {
   if (!place) {
     return null;
@@ -97,7 +97,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
   const [message, setMessage] = useState("");
 
   // General state variables
-  const [loading, setLoading] = useState(false) // possible future need for better loading state
+  const [loading, setLoading] = useState(false); // possible future need for better loading state
 
   // Setup firestore Query
   const currentDate = new Date();
@@ -122,7 +122,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
     setIsOpen(open);
   };
 
-  // JSX function to generate all messages queried above 
+  // JSX function to generate all messages queried above
   const scrollMessages = () => {
     if (!messages) {
       return (
@@ -139,44 +139,94 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
       );
     }
 
+    const voteOnMessage = (msg: any, downVote: boolean) => {
+      const msgRef = doc(firestore, "chats", msg.id);
+      const userId = currentUser.data!.uid;
+      let q = false;
+      let userOppositeVoted = false;
+      // Possible occurences: downVote, user already upvotes
+      if (downVote) {
+        userOppositeVoted = msg.upVoters.includes(userId);
+        q = msg.downVoters.includes(userId);
+      } else {
+        userOppositeVoted = msg.downVoters.includes(userId);
+        q = msg.upVoters.includes(userId);
+      }
+
+      if (userOppositeVoted) {
+        // if user opposite voted and trying to downvote, remove user from upvoters, add to downvoters
+        if (downVote) {
+          updateDoc(msgRef, {
+            votes: msg.votes - 2,
+            upVoters: msg.upVoters.filter((voter: string) => voter !== userId),
+            downVoters: [...msg.downVoters, userId],
+          });
+        } else {
+          // user already downvoted and trying to upvote, remove downvote
+          updateDoc(msgRef, {
+            votes: msg.votes + 2,
+            upVoters: [...msg.upVoters, userId],
+            downVoters: msg.downVoters.filter(
+              (voter: string) => voter !== userId
+            ),
+          });
+        }
+      } else if (q) {
+        // if q is true, user already exists in respective array
+        if (downVote) {
+          updateDoc(msgRef, {
+            votes: msg.votes + 1,
+            downVoters: msg.downVoters.filter(
+              (voter: string) => voter !== userId
+            ),
+          });
+        } else {
+          updateDoc(msgRef, {
+            votes: msg.votes - 1,
+            upVoters: msg.upVoters.filter((voter: string) => voter !== userId),
+          });
+        }
+      } else {
+        if (downVote) {
+          updateDoc(msgRef, {
+            votes: msg.votes - 1,
+            downVoters: [...msg.downVoters, userId],
+          });
+        } else {
+          updateDoc(msgRef, {
+            votes: msg.votes + 1,
+            upVoters: [...msg.upVoters, userId],
+          });
+        }
+      }
+    };
+
     return messages.map((msg) => (
       <div
         className="text-mauve12 text-[13px] leading-[18px] mt-2.5 pt-2.5 border-t border-t-mauve6"
         key={`${msg.uid}-${msg.time}`}
       >
         <div className="flex items-center justify-between">
-          <div>Anonymous {msg?.animal} {msg.animal ? getAnimalEmoji(msg.animal) : ""}</div> {/* Username */}
+          <div>
+            Anonymous {msg?.animal}{" "}
+            {msg.animal ? getAnimalEmoji(msg.animal) : ""}
+          </div>{" "}
+          {/* Username */}
           <div>{getHumanReadableTime(msg.time)}</div> {/* Time */}
         </div>
         <div className="flex items-center justify-between">
           <div>{msg.message}</div> {/* Message Content */}
           <div>
-            <button onClick={() => {
-              const msgRef = doc(firestore, "chats", msg.id);
-              const userId = currentUser.data!.uid;
+            <button onClick={() => voteOnMessage(msg, false)} className="px-3">
+              <FontAwesomeIcon icon={faCaretUp} />
+            </button>
 
-              const q = query(collection(firestore, "chats"), where("upVoters", "array-contains", userId));
-              if (msg.upVoters == undefined || msg.upVoters.length === 0 || !q) {
-                updateDoc(msgRef, {
-                  upVote: (msg.upVote) ? msg.upVote + 1 : 1,
-                  upVoters: (msg.upVoters == null) ? [userId] : msg.upVoters.push(userId),
-                });
-              }
-            }} className="px-3"><FontAwesomeIcon icon={faCaretUp} />{msg.upVote}</button>
-            
-            <button onClick={() => {
-              const msgRef = doc(firestore, "chats", msg.id);
-              const userId = currentUser.data!.uid;
-
-              const q = query(collection(firestore, "chats"), where("downVoters", "array-contains", userId));
-              if (msg.downVoters == undefined || msg.downVoters.length === 0 || !q) {
-                updateDoc(msgRef, {
-                  downVote: (msg.downVote) ? msg.downVote - 1 : -1,
-                  downVoters: (msg.downVoters == null) ? [userId] : msg.downVoters.push(userId),
-                });
-              }
-            }}><FontAwesomeIcon icon={faCaretDown} />{msg.downVote}</button>
-          </div> {/* Up and Down Vote */}
+            <button onClick={() => voteOnMessage(msg, true)}>
+              <FontAwesomeIcon icon={faCaretDown} />
+            </button>
+            <span className="ml-2">{msg.votes}</span>
+          </div>{" "}
+          {/* Up and Down Vote */}
         </div>
       </div>
     ));
@@ -230,6 +280,7 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
                     time: Timestamp.now().seconds,
                     uid: userUID,
                     animal: userAnimal,
+                    votes: 0,
                     upVoters: [],
                     downVoters: [],
                   });
