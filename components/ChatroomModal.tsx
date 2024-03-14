@@ -201,37 +201,51 @@ export const ChatroomModal: FC<ChatroomModalProps> = ({
       }
     };
 
-    return messages.map((msg) => (
-      <div
-        className="text-mauve12 text-[13px] leading-[18px] mt-2.5 pt-2.5 border-t border-t-mauve6"
-        key={`${msg.uid}-${msg.time}`}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            Anonymous {msg?.animal}{" "}
-            {msg.animal ? getAnimalEmoji(msg.animal) : ""}
-          </div>{" "}
-          {/* Username */}
-          <div>{getHumanReadableTime(msg.time)}</div> {/* Time */}
-        </div>
-        <div className="flex items-center justify-between">
-          <div>{msg.message}</div> {/* Message Content */}
-          <div>
-            <button onClick={() => voteOnMessage(msg, false)} className="px-3">
-              <FontAwesomeIcon icon={faCaretUp} />
-            </button>
+    return messages.map((msg) => {
+      let userUpVoted = false;
+      let userDownVoted = false;
+      if (Array.isArray(msg.upVoters) && msg.upVoters.includes(userUID)) {
+        userUpVoted = true;
+      } else if (
+        Array.isArray(msg.downVoters) &&
+        msg.downVoters.includes(userUID)
+      ) {
+        userDownVoted = true;
+      }
+      return (
+        <div
+          className="text-mauve12 text-[13px] leading-[18px] mt-2.5 pt-2.5 border-t border-t-mauve6"
+          key={`${msg.uid}-${msg.time}`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              Anonymous {msg?.animal}{" "}
+              {msg.animal ? getAnimalEmoji(msg.animal) : ""}
+            </div>{" "}
+            {/* Username */}
+            <div>{getHumanReadableTime(msg.time)}</div> {/* Time */}
+          </div>
+          <div className="flex items-center justify-between">
+            <div>{msg.message}</div> {/* Message Content */}
+            <div>
+              <button
+                onClick={() => voteOnMessage(msg, false)}
+                className="px-3"
+              >
+                <FontAwesomeIcon icon={faCaretUp} style={userUpVoted ? { color: "blue" } : {}} />
+              </button>
 
-            <button onClick={() => voteOnMessage(msg, true)}>
-              <FontAwesomeIcon icon={faCaretDown} />
-            </button>
-            <span className="ml-2">{msg.votes}</span>
-          </div>{" "}
-          {/* Up and Down Vote */}
+              <button onClick={() => voteOnMessage(msg, true)}>
+                <FontAwesomeIcon icon={faCaretDown} style={userDownVoted ? { color: "red" } : {}} />
+              </button>
+              <span className="ml-2">{msg.votes}</span>
+            </div>{" "}
+            {/* Up and Down Vote */}
+          </div>
         </div>
-      </div>
-    ));
+      );
+    });
   };
-
   if (loading) {
     return <p>Loading...</p>;
   }
