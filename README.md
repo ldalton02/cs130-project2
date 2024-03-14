@@ -13,7 +13,7 @@ To visit our up and running website, visit [Bruin Banter](https://bruinbanter.ne
 
 Clone our git repository locally :
 ```
-git clone https://github.com/cs130-w21/17
+git clone https://github.com/ldalton02/cs130-project2.git
 ```
 Ensure that Node.js or npm is installed on your system. It can be downloaded from [here](https://nodejs.org/en/). Install the version of npm that we used by running: 
 ```
