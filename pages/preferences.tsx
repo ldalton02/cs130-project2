@@ -25,7 +25,7 @@ import { toast } from "@/components/ui/use-toast";
  * Creates and specifies user preferences
  * @returns user preferences
  */
-export default function userSettings() {
+export default function UserSettings() {
   // Hooks + fireStore setup
   const { data: user } = useUser();
   const firestore = useFirestore();
@@ -74,14 +74,14 @@ export default function userSettings() {
     }
   };
   
-  // useEffect hook to only query user data once user query has finished 
+  // useEffect hook to only query user data once user query has finished
   useEffect(() => {
     if (user) {
       fetchUserData();
     }
   }, [user]);
 
-  // State change function passed down to Select component 
+  // State change function passed down to Select component
   const updateAnimal = (animal: any) => {
     if (!stateChanged) {
       setStateChanged(true);
@@ -89,10 +89,10 @@ export default function userSettings() {
     setUserAnimal(animal);
   };
 
-  // Update appropriate user animal in "userdata" Firestore table 
+  // Update appropriate user animal in "userdata" Firestore table
   const submitUserAnimalChange = async () => {
     try {
-      // Select appropriate document queried earlier 
+      // Select appropriate document queried earlier
       const userDocRef = doc(userDataCollection, userDocumentID);
       // Only update if user hasn't changed recently
       if (userLastTimeChanged) {
@@ -116,7 +116,7 @@ export default function userSettings() {
           return;
         }
       }
-      // Update document 
+      // Update document
       await updateDoc(userDocRef, {
         animal: userAnimal,
         time: Timestamp.now(),
@@ -132,7 +132,7 @@ export default function userSettings() {
         description: "Error updating user animal.",
       });
     }
-    // Reload page if user has changed state 
+    // Reload page if user has changed state
     setTimeout(() => {
       router.reload();
     }, 2000);
