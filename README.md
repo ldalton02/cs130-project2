@@ -29,7 +29,11 @@ Finally, run the following to run the project at localhost:3000
 npm run dev
 ```
 
-Disclaimer: Running Google Maps API requires a private key which has not been publicly released. Recommended use is through our deployed and live version.
+Disclaimer: Running Google Maps API requires a private key which has not been publicly released. Recommended use is through our deployed and live version. <br /> <br />
+If you would like to run locally with your own Google Maps API key, create a file called **.env.local** at the root of the repository and add the following line:
+```
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=<YOUR API KEY>
+```
 
 ## User Manual
 
