@@ -99,6 +99,7 @@ export default function Home() {
       idField: "id",
     }
   );
+  // test change
   // END
 
   const activities: { [key: string]: number } = {};
