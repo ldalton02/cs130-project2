@@ -149,7 +149,6 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
 
   return (
-
     <div
       ref={mapRef}
       className={className}
