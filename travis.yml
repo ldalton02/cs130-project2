@@ -3,3 +3,17 @@ cache:
     - $HOME/.cache/yarn
     - node_modules
     - .next/cache
+    
+language: node_js
+node_js:
+  - "node" # Latest Node.js version
+
+branches:
+  only:
+    - main
+
+install:
+  - npm install --dev
+
+script:
+  - npm run test

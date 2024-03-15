@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "docs:generate": "typedoc --out docs ./assets/**/*.tsx ./components/**/*.tsx ./pages/**/*.tsx",
-    "docs:serve": "typedoc --out docs ./assets/**/*.tsx ./components/**/*.tsx ./pages/**/*.tsx --serve"
+    "docs:serve": "typedoc --out docs ./assets/**/*.tsx ./components/**/*.tsx ./pages/**/*.tsx --serve",
+    "test": "jest"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -32,12 +33,9 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
     "@react-google-maps/api": "^2.19.3",
-    "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.2.1",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.0.0",
-    "jest": "^29.7.0",
     "lucide-react": "^0.284.0",
     "mui": "^0.0.1",
     "next": "latest",
@@ -51,12 +49,23 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.23.3",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.2.1",
+    "@types/jest": "^29.5.12",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "autoprefixer": "latest",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "latest",
     "tailwindcss": "latest",
+    "ts-node": "^10.9.2",
     "typedoc": "^0.25.11",
     "typescript": "latest"
   }
